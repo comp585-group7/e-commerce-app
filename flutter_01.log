@@ -1,0 +1,67 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter run --machine --start-paused -d chrome --devtools-server-address http://127.0.0.1:9100/ --target /Users/tim/Documents/GitHub/ecommerceapp/lib/main.dart
+
+## exception
+
+HttpException: HttpException: Connection closed before full header was received, uri = http://localhost:62712/json
+
+```
+```
+
+## flutter doctor
+
+```
+[!] Flutter (Channel stable, 3.24.2, on macOS 14.6.1 23G93 darwin-arm64, locale en-US)
+    • Flutter version 3.24.2 on channel stable at /Users/tim/Desktop/comp585/Flutter/flutter
+    ! The flutter binary is not on your path. Consider adding /Users/tim/Desktop/comp585/Flutter/flutter/bin to your path.
+    ! The dart binary is not on your path. Consider adding /Users/tim/Desktop/comp585/Flutter/flutter/bin to your path.
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 4cf269e36d (3 weeks ago), 2024-09-03 14:30:00 -0700
+    • Engine revision a6bd3f1de1
+    • Dart version 3.5.2
+    • DevTools version 2.37.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform update checks and upgrades.
+
+[✗] Android toolchain - develop for Android devices
+    ✗ Unable to locate Android SDK.
+      Install Android Studio from: https://developer.android.com/studio/index.html
+      On first launch it will assist you in installing the Android SDK components.
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+      If the Android SDK has been installed to a custom location, please use
+      `flutter config --android-sdk` to update to that location.
+
+
+[!] Xcode - develop for iOS and macOS (Xcode 15.4)
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 15F31d
+    ✗ CocoaPods not installed.
+        CocoaPods is a package manager for iOS or macOS platform code.
+        Without CocoaPods, plugins will not work on iOS or macOS.
+        For more info, see https://flutter.dev/to/platform-plugins
+      For installation instructions, see https://guides.cocoapods.org/using/getting-started.html#installation
+
+[✓] Chrome - develop for the web
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[!] Android Studio (not installed)
+    • Android Studio not found; download from https://developer.android.com/studio/index.html
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+
+[✓] VS Code (version 1.83.1)
+    • VS Code at /Users/tim/Downloads/Visual Studio Code.app/Contents
+    • Flutter extension version 3.96.0
+
+[✓] Connected device (3 available)
+    • macOS (desktop)                 • macos                 • darwin-arm64   • macOS 14.6.1 23G93 darwin-arm64
+    • Mac Designed for iPad (desktop) • mac-designed-for-ipad • darwin         • macOS 14.6.1 23G93 darwin-arm64
+    • Chrome (web)                    • chrome                • web-javascript • Google Chrome 128.0.6613.139
+
+[✓] Network resources
+    • All expected network resources are available.
+
+! Doctor found issues in 4 categories.
+```
