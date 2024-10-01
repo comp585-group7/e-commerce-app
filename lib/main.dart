@@ -7,14 +7,17 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 // for reading json files, remember to update pubsec.yaml file
 import 'dart:convert';
 
+
 void main() {
-  runApp(StyleHiveApp());
+  runApp(const StyleHiveApp());
 }
 
 // Declaring global variables
 const double titleSpace = 4.0;
 
 class StyleHiveApp extends StatelessWidget {
+  const StyleHiveApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,13 +27,15 @@ class StyleHiveApp extends StatelessWidget {
         primaryColor: Colors.black,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
-}
+} 
 /// END  of StyleHiveApp, Root of App
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -55,78 +60,32 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Method to build the top AppBar for reuse
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.black,
-      automaticallyImplyLeading: false, // No back button at all
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ShopPage(appBarBuilder: buildAppBar)),
-              );
-            },
-            child: const Text(
-              'Shop',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => HomePage()));
-            },
-            child: const Text(
-              'StyleHive',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            ProfilePage(appBarBuilder: buildAppBar)),
-                  );
-                },
-                child: const Text(
-                  'Profile',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.search, color: Colors.white),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            SearchPage(appBarBuilder: buildAppBar)),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            CartPage(appBarBuilder: buildAppBar)),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+  // Shop by Category card builder
+  Widget _buildCategoryCard(String category, String imageAsset) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to category page or filter products
+      },
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(imageAsset, width: 30, height: 30),
+            const SizedBox(width: 10),
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+              context,
+              // Goes to the shop page
+              MaterialPageRoute(
+                  builder: (context) => const ShopPage(appBarBuilder: buildAppBar)),
+            );
+              }, 
+              child: Text(category, style: const TextStyle(fontSize: 16.0))),
+          ],
+        ),
       ),
     );
   }
@@ -138,48 +97,45 @@ class _HomePageState extends State<HomePage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     double cardHeight = screenHeight * 0.4;
-    double cardWidth = screenWidth > 650 ? screenWidth * 0.3 : screenWidth * 0.5;
-
-    // Adjust padding based on screen size
-    double productPadding = screenWidth > 600 ? 20.0 : 50.0;
+    double cardWidth = screenWidth * 0.45;
 
     return Scaffold(
       appBar: buildAppBar(context), // Use the reusable AppBar method
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(    // Banner where we can show the products we have
-            height: 250.0,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/nature.jpg'),
-                fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              height: 250.0,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/nature.jpg'),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20), // divides banner from Product scroll
-          // Product scroll
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),  
-            child: Text(
-              'Shop Latest Apparel',
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Shop Latest Apparel',
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Stack(
-              children: [
-                Row(
-                  children: [
-                    SizedBox(width: productPadding),
-                    Expanded(
-                      child: SizedBox(
-                        height: cardHeight,
+            const SizedBox(height: 10),
+            // Product slide
+            Container(
+              height: cardHeight,
+              child: Stack(
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 50),
+                      Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
                           scrollDirection: Axis.horizontal,
@@ -196,22 +152,22 @@ class _HomePageState extends State<HomePage> {
                                           'Description of Product ${index + 1}',
                                       productImage:
                                           'assets/images/product_${index % 4 + 1}.png',
-                                      // placeholder price
                                       productPrice: (index + 1) * 20.0,
                                     ),
                                   ),
                                 );
                               },
                               child: Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: screenWidth > 600 ? 5.0 : 8.0), // Adjust horizontal padding
-                                child: SizedBox(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: Container(
                                   width: cardWidth,
                                   child: Column(
                                     children: [
                                       Expanded(
                                         child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
                                           child: Image.asset(
                                             'assets/images/product_${index % 4 + 1}.png',
                                             fit: BoxFit.contain,
@@ -230,7 +186,7 @@ class _HomePageState extends State<HomePage> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            const SizedBox(height: 5),  // dividing the product title from price
+                                            const SizedBox(height: 5),
                                             Text(
                                               '\$${(index + 1) * 20}',
                                               style: const TextStyle(
@@ -249,11 +205,9 @@ class _HomePageState extends State<HomePage> {
                           },
                         ),
                       ),
-                    ),
-                    SizedBox(width: productPadding), // Adjust spacing
-                  ],
-                ),
-                if (screenWidth > 600) // Conditionally show buttons on large screens
+                      const SizedBox(width: 50),
+                    ],
+                  ),
                   Positioned(
                     left: 0,
                     top: cardHeight / 2 - 25,
@@ -264,7 +218,6 @@ class _HomePageState extends State<HomePage> {
                       child: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
                   ),
-                if (screenWidth > 600)
                   Positioned(
                     right: 0,
                     top: cardHeight / 2 - 25,
@@ -272,82 +225,113 @@ class _HomePageState extends State<HomePage> {
                       backgroundColor: Colors.black,
                       mini: true,
                       onPressed: _scrollRight,
-                      child: const Icon(Icons.arrow_forward, color: Colors.white),
+                      child:
+                          const Icon(Icons.arrow_forward, color: Colors.white),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 40),
-          // About Us and Contact Us section
-          Container(
-            color: Colors.grey[900],
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  'About Us',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+            const SizedBox(height: 20),
+            // Categories Section
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Shop by Category',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  'StyleHive is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16.0,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Contact Us',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.facebook,
-                          color: Colors.white),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.twitter,
-                          color: Colors.white),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.instagram,
-                          color: Colors.white),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: 2.5,
+                children: [
+                  _buildCategoryCard('Shirt', 'assets/images/product_1.png'),
+                  _buildCategoryCard('Shorts', 'assets/images/product_4.png'),
+                  _buildCategoryCard('Winter Jacket', 'assets/images/product_2.png'),
+                  _buildCategoryCard('Regular Jacket', 'assets/images/product_3.png'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+            Container(
+              color: Colors.grey[900],
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'About Us',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'StyleHive is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16.0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Contact Us',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.facebook,
+                            color: Colors.white),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.twitter,
+                            color: Colors.white),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.instagram,
+                            color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
 // End of Main Landing Page class
+
 
 ///
 /// Global Method to build the top AppBar for reuse
-///   - this is the top bar seen on most
+///   - this is the top Appbar seen on most pages
+///
 AppBar buildAppBar(BuildContext context) {
   return AppBar(
     backgroundColor: Colors.black,
@@ -361,7 +345,7 @@ AppBar buildAppBar(BuildContext context) {
               context,
               // Goes to the shop page
               MaterialPageRoute(
-                  builder: (context) => ShopPage(appBarBuilder: buildAppBar)),
+                  builder: (context) => const ShopPage(appBarBuilder: buildAppBar)),
             );
           },
           child: const Text(
@@ -374,7 +358,7 @@ AppBar buildAppBar(BuildContext context) {
             Navigator.pushReplacement(
                 context,
                 // Just goes back to the landing page
-                MaterialPageRoute(builder: (context) => HomePage()));
+                MaterialPageRoute(builder: (context) => const HomePage()));
           },
           child: const Text(
             'StyleHive',
@@ -389,8 +373,8 @@ AppBar buildAppBar(BuildContext context) {
                   context,
                   // Goes to the Profile page
                   MaterialPageRoute(
-                      builder: (context) =>
-                          ProfilePage(appBarBuilder: buildAppBar)),
+                      builder: (context) => const ProfilePage(
+                          appBarBuilder: buildAppBar, username: "admin")),
                 );
               },
               child: const Text(
@@ -406,7 +390,7 @@ AppBar buildAppBar(BuildContext context) {
                   // goes to the Search page
                   MaterialPageRoute(
                       builder: (context) =>
-                          SearchPage(appBarBuilder: buildAppBar)),
+                          const SearchPage(appBarBuilder: buildAppBar)),
                 );
               },
             ),
@@ -417,7 +401,7 @@ AppBar buildAppBar(BuildContext context) {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          CartPage(appBarBuilder: buildAppBar)),
+                          const CartPage(appBarBuilder: buildAppBar)),
                 );
               },
             ),
@@ -427,6 +411,38 @@ AppBar buildAppBar(BuildContext context) {
     ),
   );
 }
+/// End of Global AppBar global method
+
+
+
+// Profile Page
+class ProfilePage extends StatelessWidget {
+  final AppBar Function(BuildContext) appBarBuilder;
+  final String username;
+
+  const ProfilePage(
+      {super.key,
+      required this.appBarBuilder,
+      required this.username}); // end of ProfilePage constructor
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appBarBuilder(context),
+      body: const SingleChildScrollView(
+      child: Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Placeholder text title
+          Text("User Profile Page"),
+          SizedBox(height: titleSpace),
+        ],  // Column children
+      )),
+    ));
+  }
+}
+
 
 /// Shop Page
 ///
@@ -434,7 +450,7 @@ AppBar buildAppBar(BuildContext context) {
 class ShopPage extends StatelessWidget {
   final AppBar Function(BuildContext) appBarBuilder;
 
-  ShopPage({required this.appBarBuilder});
+  const ShopPage({super.key, required this.appBarBuilder});
 
   @override
   Widget build(BuildContext context) {
@@ -452,34 +468,11 @@ class ShopPage extends StatelessWidget {
   }
 }
 
-// Profile Page
-class ProfilePage extends StatelessWidget {
-  final AppBar Function(BuildContext) appBarBuilder;
-
-  ProfilePage({required this.appBarBuilder});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBarBuilder(context),
-      body: const Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Placeholder text title
-          Text("User Profile Page"),
-          SizedBox(height: titleSpace),
-        ],
-      )),
-    );
-  }
-}
-
 // Search Page
 class SearchPage extends StatelessWidget {
   final AppBar Function(BuildContext) appBarBuilder;
 
-  SearchPage({required this.appBarBuilder});
+  const SearchPage({super.key, required this.appBarBuilder});
 
   @override
   Widget build(BuildContext context) {
@@ -500,10 +493,12 @@ class SearchPage extends StatelessWidget {
 ///   this is where the user would be able to see all the items they are going to buy.
 ///
 ///   DESIGN PLANS: Add a way to show many items are in the customer's cart
+///
+///
 class CartPage extends StatelessWidget {
   final AppBar Function(BuildContext) appBarBuilder;
 
-  CartPage({super.key, required this.appBarBuilder});
+  const CartPage({super.key, required this.appBarBuilder});
 
   @override
   Widget build(BuildContext context) {
@@ -520,10 +515,12 @@ class CartPage extends StatelessWidget {
     );
   }
 }
-
 /// End of Cart page
 
-///   This section below is for Product Details, this is showed when
+
+
+///   This section below is for Product Details
+///
 ///   the user clicks the product on the
 ///
 ///   Current design, Image of item(right) Description with price(left)
@@ -534,8 +531,10 @@ class ProductDetailsPage extends StatelessWidget {
   final String productDescription;
   final String productImage;
   final double productPrice;
+  final int productId = 0; // placeholder value, this would be on the database
 
-  ProductDetailsPage({
+  const ProductDetailsPage({
+    super.key,
     required this.productName,
     required this.productDescription,
     required this.productImage,
@@ -650,7 +649,7 @@ class ProductDetailsPage extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CartPage(
+                    builder: (context) => const CartPage(
                         appBarBuilder: buildAppBar), // Navigate to Cart Page
                   ),
                 );
@@ -663,7 +662,7 @@ class ProductDetailsPage extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ShopPage(
+                    builder: (context) => const ShopPage(
                         appBarBuilder: buildAppBar), // Navigate to Shop Page
                   ),
                 );
