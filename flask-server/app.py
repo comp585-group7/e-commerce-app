@@ -84,3 +84,12 @@ def remove_from_cart(item_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+# To run the server follow these steps:
+# Make a Python virtual environment, then activate
+# Install these dependencies: flask, flask-cors 
+#    pip install flask
+#    pip install flask-cors
+# Then run app.py
+#     Use "python qpp.py'" on the command line
