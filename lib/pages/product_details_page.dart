@@ -41,7 +41,8 @@ void _showAddToCartDialog(BuildContext context, String message) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CartPage(appBarBuilder: buildAppBar), // Navigate to Cart Page
+                  builder: (context) => CartPage(
+                      appBarBuilder: buildAppBar), // Navigate to Cart Page
                 ),
               );
             },
@@ -53,7 +54,8 @@ void _showAddToCartDialog(BuildContext context, String message) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ShopPage(appBarBuilder: buildAppBar), // Navigate to Shop Page
+                  builder: (context) => ShopPage(
+                      appBarBuilder: buildAppBar), // Navigate to Shop Page
                 ),
               );
             },
@@ -100,7 +102,14 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.asset(widget.productImage, height: 200, fit: BoxFit.contain),
+            Image.network(
+              widget.productImage,
+              height: 200,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.error); // Show an error icon in case image fails to load
+              },
+            ),
             const SizedBox(height: 20),
             Text(
               widget.productName,

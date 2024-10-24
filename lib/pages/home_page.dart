@@ -31,20 +31,21 @@ class _HomePageState extends State<HomePage> {
 
   // Load product data from JSON
   Future<void> _loadProductData() async {
-    final response = await http.get(Uri.parse('http://localhost:5000/api/products/featured'));
-    
+    final response = await http
+        .get(Uri.parse('http://localhost:5000/api/products/featured'));
+
     // for android emulator
-    //final response = await http.get(Uri.parse('http://10.0.2.2:5000/api/products/featured')); 
+    //final response = await http.get(Uri.parse('http://10.0.2.2:5000/api/products/featured'));
 
     if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    setState(() {
-      products = data['products'];
-    });
-  } else {
-    throw Exception('Failed to load products');
+      final data = json.decode(response.body);
+      setState(() {
+        products = data['products'];
+      });
+    } else {
+      throw Exception('Failed to load products');
+    }
   }
-}
 
   // Load category data from JSON
   Future<void> _loadCategoryData() async {
@@ -84,7 +85,15 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(width: 15),
-              Image.asset(imageAsset, width: 30, height: 30),
+              Image.network(
+                imageAsset,
+                width: 30,
+                height: 30,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons
+                      .error); // Show an error icon in case image fails to load
+                },
+              ),
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {},
@@ -176,10 +185,15 @@ class _HomePageState extends State<HomePage> {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(8.0),
-                                          child: Image.asset(
+                                          child: Image.network(
                                             product['image'],
                                             fit: BoxFit.contain,
                                             width: double.infinity,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Icon(Icons
+                                                  .error); // Show an error icon in case image fails to load
+                                            },
                                           ),
                                         ),
                                       ),

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'product_details_page.dart'; // Import ProductDetailsPage
 
-import 'app_bar.dart'; // Import buildAppBar function
-
 /// Shop Page
-///
 /// This page would show all the items being sold
 class ShopPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
@@ -18,23 +16,53 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
+  final ScrollController _scrollController = ScrollController();
+  TextEditingController searchController = TextEditingController();
+
   List<dynamic> products = [];
   List<dynamic> searchResults = [];
-  TextEditingController searchController = TextEditingController();
+  List<dynamic> categories = [];
 
   @override
   void initState() {
     super.initState();
     loadProductData();
+    _loadCategoryData();
     searchController.addListener(() {
       filterSearchResults(searchController.text);
     });
   }
 
+  // Load category data from JSON
+  Future<void> _loadCategoryData() async {
+    final String response =
+        await rootBundle.loadString('assets/data-ctlg.json');
+    final data = await json.decode(response);
+    setState(() {
+      categories = data['categories'];
+    });
+  }
+
+  void _scrollRight() {
+    _scrollController.animateTo(
+      _scrollController.offset + 300,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollLeft() {
+    _scrollController.animateTo(
+      _scrollController.offset - 300,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
   Future<void> loadProductData() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:5000/api/products'));
-      //final response = await http.get(Uri.parse('http://10.0.2.2:5000/api/products')); // for android emulator
+      final response =
+          await http.get(Uri.parse('http://localhost:5000/api/products'));
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -63,8 +91,8 @@ class _ShopPageState extends State<ShopPage> {
     });
   }
 
-  Widget _buildShopCard(
-      String productName, String imageAsset, double productPrice, String pdescription, int productId) {
+  Widget _buildShopCard(String productName, String imageAsset,
+      double productPrice, String pdescription, int productId) {
     String priceRecord = "\$$productPrice";
     return GestureDetector(
       onTap: () {
@@ -85,27 +113,68 @@ class _ShopPageState extends State<ShopPage> {
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         child: Padding(
-          padding: const EdgeInsets.all(16.0), // Add some padding for spacing
+          padding: const EdgeInsets.all(16.0),
           child: Center(
-            child: Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center, // Ensure horizontal centering
-                children: [
-                  Image.asset(imageAsset,
-                      width: 160,
-                      height: 160), // Increased image size for better visibility
-                  const SizedBox(height: 10), // Vertical space between image and text
-                  Text(productName,
-                      textAlign: TextAlign.center), // Center the text
-                  Text(
-                    priceRecord,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.green),
-                  ),
-                ],
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.network(
+                  imageAsset,
+                  width: 160,
+                  height: 160,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons
+                        .error); // Show an error icon in case image fails to load
+                  },
+                ),
+                const SizedBox(height: 10),
+                Text(productName, textAlign: TextAlign.center),
+                Text(
+                  priceRecord,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.green),
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(String category, String imageAsset) {
+    return GestureDetector(
+      onTap: () {
+        // filter products based on category
+        filterSearchResults(category);
+      },
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 15),
+              Image.network(
+                imageAsset,
+                width: 30,
+                height: 30,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.error); // Show an error icon in case image fails to load
+                },
+              ),
+              const SizedBox(width: 10),
+              TextButton(
+                onPressed: () {
+                  // filter products based on category
+                  filterSearchResults(category);
+                },
+                child: Text(category, style: const TextStyle(fontSize: 16.0)),
+              ),
+            ],
           ),
         ),
       ),
@@ -115,7 +184,7 @@ class _ShopPageState extends State<ShopPage> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    var isSmallScreen = screenWidth < 750;
+    var isSmallScreen = screenWidth < 830;
 
     return Scaffold(
       appBar: widget.appBarBuilder(context),
@@ -142,7 +211,36 @@ class _ShopPageState extends State<ShopPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios),
+                  onPressed: _scrollLeft,
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: _scrollController,
+                    child: Row(
+                      children: categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: _buildCategoryCard(
+                              category['name'], category['image']),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios),
+                  onPressed: _scrollRight,
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
             searchResults.isEmpty
                 ? const Center(child: CircularProgressIndicator())
                 : GridView.builder(
@@ -150,10 +248,11 @@ class _ShopPageState extends State<ShopPage> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: searchResults.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: isSmallScreen ? 2 : 4, // Number of cards per row
-                      crossAxisSpacing: 10, // Horizontal space between cards
-                      mainAxisSpacing: 10, // Vertical space between cards
-                      childAspectRatio: isSmallScreen ? 2 / 2.8 : 2 / 1.5,
+                      crossAxisCount: isSmallScreen ? 2 : 4,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio:
+                          isSmallScreen ? 2 / 2.8 : 2 / 2.5, // Adjust the ratio
                     ),
                     itemBuilder: (context, index) {
                       return _buildShopCard(
