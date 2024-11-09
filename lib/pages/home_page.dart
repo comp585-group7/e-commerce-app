@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    
     _loadProductData();
     _loadCategoryData();
   }
@@ -77,6 +78,7 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {},
       child: Card(
+        color: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         child: SingleChildScrollView(
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {},
-                child: Text(category, style: const TextStyle(fontSize: 16.0)),
+                child: Text(category, style: TextStyle(fontSize: 16.0, color: Colors.black)),
               ),
             ],
           ),
@@ -126,7 +128,7 @@ class _HomePageState extends State<HomePage> {
               height: 250.0,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/nature.jpg'),
+                  image: NetworkImage('https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png'),
                   fit: BoxFit.cover,
                 ),
               ),
