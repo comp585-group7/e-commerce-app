@@ -41,8 +41,7 @@ void _showAddToCartDialog(BuildContext context, String message) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => CartPage(
-                      appBarBuilder: buildAppBar), // Navigate to Cart Page
+                  builder: (context) => CartPage(appBarBuilder: buildAppBar),
                 ),
               );
             },
@@ -54,8 +53,7 @@ void _showAddToCartDialog(BuildContext context, String message) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ShopPage(
-                      appBarBuilder: buildAppBar), // Navigate to Shop Page
+                  builder: (context) => ShopPage(appBarBuilder: buildAppBar),
                 ),
               );
             },
@@ -76,7 +74,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       'id': widget.productId.toString(),
       'name': widget.productName,
       'price': widget.productPrice,
-      'quantity': quantity, // Include quantity in the cart item
+      'quantity': quantity,
+      'image': widget.productImage
     };
 
     final response = await http.post(
@@ -88,7 +87,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     if (response.statusCode == 201) {
       _showAddToCartDialog(context, "Added to cart: ${widget.productName}");
     } else {
-      // Handle error
       _showAddToCartDialog(context, "Failed to add item to cart");
     }
   }
@@ -96,43 +94,68 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Product Details')),
+      appBar: AppBar(title: const Text('Product Details')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.network(
-              widget.productImage,
-              height: 200,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.error); // Show an error icon in case image fails to load
-              },
-            ),
-            const SizedBox(height: 20),
-            Text(
-              widget.productName,
-              style: const TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '\$${widget.productPrice.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 20.0,
-                color: Colors.green,
+            // Image Carousel Section
+            SizedBox(
+              height: 250,
+              child: PageView.builder(
+                itemCount: 3, // Display the same image multiple times for now, not working currently
+                itemBuilder: (context, index) {
+                  return Image.network(
+                    widget.productImage,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.error); // Show an error icon if image fails to load
+                    },
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              widget.productDescription,
-              style: const TextStyle(fontSize: 16.0),
+
+            // Product Info and Description Section
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      widget.productName,
+                      style: const TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '\$${widget.productPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 20.0,
+                        color: Colors.green,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.productDescription,
+                      style: const TextStyle(fontSize: 16.0),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            // Quantity Selector
+            const Divider(height: 40, thickness: 1.5),
+
+            // Quantity Selector Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -168,7 +191,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 ),
               ],
             ),
+
             const Spacer(),
+
+            // Add to Cart Button
             ElevatedButton(
               onPressed: () => _addToCart(context, quantity),
               style: ElevatedButton.styleFrom(
