@@ -1,0 +1,116 @@
+{
+    "products": [
+      {
+        "id": 1,
+        "name": "Classic T-Shirt",
+        "image": "https://i.ibb.co/QNGzKck/product-1.png",
+        "description": "A comfortable, classic cotton t-shirt available in a variety of colors.",
+        "price": 19.99
+      },
+      {
+        "id": 2,
+        "name": "Winter Jacket",
+        "image": "https://i.ibb.co/0Gxn696/product-2.png",
+        "description": "A warm and cozy jacket perfect for cold weather.",
+        "price": 29.99
+      },
+      {
+        "id": 3,
+        "name": "Jacket",
+        "image": "https://i.ibb.co/mHN04GV/product-3.png",
+        "description": "A stylish jacket for any season, offering comfort and protection.",
+        "price": 49.99
+      },
+      {
+        "id": 4,
+        "name": "Summer Shorts",
+        "image": "https://i.ibb.co/CWNb4DV/product-4.png",
+        "description": "Lightweight and breathable shorts, ideal for hot summer days.",
+        "price": 149.99
+      },
+      {
+        "id": 5,
+        "name": "Denim Jeans",
+        "image": "https://i.ibb.co/1b03vLk/product-5.jpg",
+        "description": "Classic denim jeans with a timeless fit and durable material.",
+        "price": 39.99
+      },
+      {
+        "id": 6,
+        "name": "Leather Boots",
+        "image": "https://i.ibb.co/9hMfYJj/product-6.png",
+        "description": "Durable and stylish leather boots suitable for all occasions.",
+        "price": 89.99
+      },
+      {
+        "id": 7,
+        "name": "Sneakers",
+        "image": "https://i.ibb.co/ZGnrDJK/product-7.jpg",
+        "description": "Comfortable and versatile sneakers for everyday wear.",
+        "price": 59.99
+      },
+      {
+        "id": 8,
+        "name": "Baseball Cap",
+        "image": "https://i.ibb.co/34kFkq3/product-8.png",
+        "description": "A classic baseball cap, perfect for casual outfits.",
+        "price": 14.99
+      },
+      {
+        "id": 9,
+        "name": "Sports Watch",
+        "image": "https://i.ibb.co/Q9FWmQt/product-9.jpg",
+        "description": "A water-resistant sports watch with multiple features.",
+        "price": 199.99
+      },
+      {
+        "id": 10,
+        "name": "Sunglasses",
+        "image": "https://i.ibb.co/D4B1gNW/product-10.jpg",
+        "description": "Stylish sunglasses with UV protection.",
+        "price": 24.99
+      },
+      {
+        "id": 11,
+        "name": "Beanie Hat",
+        "image": "https://i.ibb.co/rw02cMS/product-11.jpg",
+        "description": "A soft and warm beanie hat, ideal for cold days.",
+        "price": 9.99
+      },
+      {
+        "id": 12,
+        "name": "Backpack",
+        "image": "https://i.ibb.co/R9qTmVK/product-12.jpg",
+        "description": "A durable backpack with multiple compartments for organization.",
+        "price": 79.99
+      },
+      {
+        "id": 13,
+        "name": "Belt",
+        "image": "https://i.ibb.co/Hq2xvJJ/product-13.jpg",
+        "description": "A high-quality leather belt to complement any outfit.",
+        "price": 34.99
+      },
+      {
+        "id": 14,
+        "name": "Wool Scarf",
+        "image": "https://i.ibb.co/4N20R7x/product-14.jpg",
+        "description": "A soft wool scarf to keep you warm and stylish.",
+        "price": 19.99
+      },
+      {
+        "id": 15,
+        "name": "Running Shoes",
+        "image": "https://i.ibb.co/f9w2wMG/product-15.jpg",
+        "description": "Lightweight running shoes designed for comfort and performance.",
+        "price": 89.99
+      },
+      {
+        "id": 16,
+        "name": "Leather Wallet",
+        "image": "https://i.ibb.co/q1b0Zcn/product-16.jpg",
+        "description": "A slim leather wallet with ample space for cards and cash.",
+        "price": 49.99
+      }
+    ]
+  }
