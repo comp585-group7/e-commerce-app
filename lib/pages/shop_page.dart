@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:focusable_control_builder/focusable_control_builder.dart';
+
 import 'product_details_page.dart'; // Import ProductDetailsPage
 
 /// Shop Page
 /// This page would show all the items being sold
+/// can we add a way to use focusable_control_builder.dart so that the shop cards are higlighted with black when hovered on
 class ShopPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
 
@@ -59,6 +62,7 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
+  /*
   Future<void> loadProductData() async {
     try {
       final response =
@@ -75,6 +79,21 @@ class _ShopPageState extends State<ShopPage> {
     } catch (e) {
       print('Error loading products: $e');
     }
+  }
+  */
+
+  Future<void> loadProductData() async {
+    // LOAD DATA FROM ASSETS FOR NOW, DELETE LATER ON PRODUCTION
+    try {
+    final String response = await rootBundle.loadString('assets/product.json');
+    final jsonData = json.decode(response);
+    setState(() {
+      products = jsonData['products'];
+      searchResults = products;
+    });
+  } catch (e) {
+    print('Error loading products: $e');
+  }
   }
 
   void filterSearchResults(String query) {
@@ -94,52 +113,90 @@ class _ShopPageState extends State<ShopPage> {
   Widget _buildShopCard(String productName, String imageAsset,
       double productPrice, String pdescription, int productId) {
     String priceRecord = "\$$productPrice";
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailsPage(
-              productName: productName,
-              productDescription: pdescription,
-              productImage: imageAsset,
-              productPrice: productPrice,
-              productId: productId,
+
+    return FocusableControlBuilder(
+      builder: (context, state) {
+        bool isHovered = state.isHovered;
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailsPage(
+                  productName: productName,
+                  productDescription: pdescription,
+                  productImage: imageAsset,
+                  productPrice: productPrice,
+                  productId: productId,
+                ),
+              ),
+            );
+          },
+          child: AnimatedScale(
+            scale: isHovered ? 1.0 : 0.9, // Zoom in when hovered
+            duration: const Duration(milliseconds: 200), // Animation duration
+            curve: Curves.easeInOut, // Smooth scaling curve
+            child: Card(
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16.0),
+                  bottomRight: Radius.circular(16.0),
+                ),
+                side: BorderSide(
+                  color: isHovered ? Colors.black : Colors.transparent,
+                  width: 2.0,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                          8.0), // Rounded corners for image
+                      child: Image.network(
+                        imageAsset,
+                        width: 160,
+                        height: 160,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.error,
+                              size:
+                                  40); // Show error icon if image fails to load
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      productName,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      priceRecord,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
       },
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.network(
-                  imageAsset,
-                  width: 160,
-                  height: 160,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons
-                        .error); // Show an error icon in case image fails to load
-                  },
-                ),
-                const SizedBox(height: 10),
-                Text(productName, textAlign: TextAlign.center),
-                Text(
-                  priceRecord,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.green),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -163,7 +220,8 @@ class _ShopPageState extends State<ShopPage> {
                 width: 30,
                 height: 30,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.error); // Show an error icon in case image fails to load
+                  return const Icon(Icons
+                      .error); // Show an error icon in case image fails to load
                 },
               ),
               const SizedBox(width: 10),
@@ -172,7 +230,9 @@ class _ShopPageState extends State<ShopPage> {
                   // filter products based on category
                   filterSearchResults(category);
                 },
-                child: Text(category, style: const TextStyle(fontSize: 16.0)),
+                child: Text(category,
+                    style:
+                        const TextStyle(color: Colors.black, fontSize: 16.0)),
               ),
             ],
           ),

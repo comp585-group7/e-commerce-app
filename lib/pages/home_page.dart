@@ -25,11 +25,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    
     _loadProductData();
     _loadCategoryData();
   }
 
-  // Load product data from JSON
+  // Load product data from JSON from backend
+  /*
   Future<void> _loadProductData() async {
     final response = await http
         .get(Uri.parse('http://localhost:5000/api/products/featured'));
@@ -47,6 +49,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  */
+
+  // LOAD PRODUCT DATA WITH JSON FOR NOW ON ASSETS
+  Future<void> _loadProductData() async {
+  try {
+    final String response = await rootBundle.loadString('assets/product.json');
+    final data = json.decode(response);
+    setState(() {
+      products = data['products'];
+    });
+  } catch (e) {
+    throw Exception('Failed to load products from assets');
+  }
+}
   // Load category data from JSON
   Future<void> _loadCategoryData() async {
     final String response =
@@ -77,6 +93,7 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {},
       child: Card(
+        color: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         child: SingleChildScrollView(
@@ -97,7 +114,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {},
-                child: Text(category, style: const TextStyle(fontSize: 16.0)),
+                child: Text(category, style: TextStyle(fontSize: 16.0, color: Colors.black)),
               ),
             ],
           ),
@@ -126,7 +143,7 @@ class _HomePageState extends State<HomePage> {
               height: 250.0,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/nature.jpg'),
+                  image: NetworkImage('https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png'),
                   fit: BoxFit.cover,
                 ),
               ),
