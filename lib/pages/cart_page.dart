@@ -14,6 +14,7 @@ import 'home_page.dart';
 import 'profile_page.dart';
 import 'shop_page.dart';
 import 'checkout.dart';
+import 'cart_product_page.dart';
 
 class CartPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
@@ -22,31 +23,6 @@ class CartPage extends StatefulWidget {
 
   @override
   _CartPageState createState() => _CartPageState();
-}
-
-// Helper method to build section headers with a centered, rounded square, black background, and white font
-Widget _buildSectionHeader(String title) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(
-        vertical: 8.0, horizontal: 16.0), // Adds padding on the sides
-    child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8.0), // Rounded square shape
-      ),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.bold,
-          color: Colors.white, // White font color
-        ),
-        textAlign: TextAlign.center, // Center the text within the container
-      ),
-    ),
-  );
 }
 
 class _CartPageState extends State<CartPage> {
@@ -127,6 +103,106 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
+  // Helper method to build section headers with a centered, rounded square, black background, and white font
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          vertical: 8.0, horizontal: 16.0), // Adds padding on the sides
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(8.0), // Rounded square shape
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // White font color
+          ),
+          textAlign: TextAlign.center, // Center the text within the container
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build a cart item widget
+  Widget _buildCartItem({
+    required Map<String, dynamic> item,
+    required Function(String) onRemove,
+    required Function(String, int) onUpdateQuantity,
+    Function()? onTap, // Optional callback for item click
+  }) {
+    return GestureDetector(
+      onTap: onTap, // Triggered when the item is tapped
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            // Image of the cart item
+            Image.network(
+              item['image'], // Uses 'image' URL from JSON
+              width: 90.0, // Constant width
+              height: 90.0, // Constant height
+              fit: BoxFit.cover,
+            ),
+            const SizedBox(width: 8), // Spacing between image and text
+            // Item details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['name'],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Text('Quantity: '),
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          onUpdateQuantity(item['id'], item['quantity'] - 1);
+                        },
+                      ),
+                      Text('${item['quantity']}'),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          onUpdateQuantity(item['id'], item['quantity'] + 1);
+                        },
+                      ),
+                      const SizedBox(width: 16), // Spacing before price
+                      Text(
+                        'Price: \$${item['price'].toStringAsFixed(2)}',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Delete button
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                onRemove(item['id'].toString());
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,7 +211,7 @@ class _CartPageState extends State<CartPage> {
           ? Column(
               children: [
                 _buildSectionHeader("Cart"),
-                const Center(child: Text("Your cart is empty."))
+                const Center(child: Text("Your cart is empty.")),
               ],
             )
           : Column(
@@ -146,63 +222,26 @@ class _CartPageState extends State<CartPage> {
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ListTile(
-                          title: Row(
-                            children: [
-                              Image.network(
-                                item['image'], // Uses 'image' URL from JSON
-                                width: 90.0, // Constant width
-                                height: 90.0, // Constant height
-                                fit: BoxFit.cover,
+                      return _buildCartItem(
+                        item: item,
+                        onRemove: _removeFromCart,
+                        onUpdateQuantity: _updateCartQuantity,
+                        onTap: () {
+                          print('Tapped on item: ${item['name']}');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CartProductPage(
+                                productName: item['name'],
+                                productDescription: item['desc'],
+                                productImage: item['image'],
+                                productPrice: item['price'],
+                                productId: int.parse(item['id']),
+                                productQuantity: item['quantity'],
                               ),
-                              const SizedBox(width: 8), // Spacing between image and text
-                              Expanded(
-                                child: Text(
-                                  item['name'],
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  _removeFromCart(item['id'].toString());
-                                },
-                              ),
-                            ],
-                          ),
-                          subtitle: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              const Text('Quantity: '),
-                              IconButton(
-                                icon: const Icon(Icons.remove),
-                                onPressed: () {
-                                  _updateCartQuantity(
-                                      item['id'], item['quantity'] - 1);
-                                },
-                              ),
-                              Text('${item['quantity']}'),
-                              IconButton(
-                                icon: const Icon(Icons.add),
-                                onPressed: () {
-                                  _updateCartQuantity(
-                                      item['id'], item['quantity'] + 1);
-                                },
-                              ),
-                              const SizedBox(width: 16), // Spacing before price
-                              Text(
-                                  'Price: \$${item['price'].toStringAsFixed(2)}'),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

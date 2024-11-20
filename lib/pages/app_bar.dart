@@ -14,67 +14,59 @@ import 'cart_page.dart';
 AppBar buildAppBar(BuildContext context) {
   return AppBar(
     backgroundColor: Colors.black,
-    automaticallyImplyLeading: false, // No back button at all
+    automaticallyImplyLeading: false,
     title: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        TextButton(
+        _buildFocusableButton(
+          label: 'Shop',
+          context: context,
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              // Goes to the shop page
               MaterialPageRoute(
                   builder: (context) => ShopPage(appBarBuilder: buildAppBar)),
             );
           },
-          child: const Text(
-            'Shop',
-            style: TextStyle(color: Colors.white),
-          ),
         ),
-        TextButton(
+        _buildFocusableButton(
+          label: 'StyleHive',
+          context: context,
           onPressed: () {
             Navigator.pushReplacement(
                 context,
-                // Just goes back to the landing page
                 MaterialPageRoute(builder: (context) => const HomePage()));
           },
-          child: const Text(
-            'StyleHive',
-            style: TextStyle(color: Colors.white),
-          ),
         ),
         Row(
           children: [
-            TextButton(
+            _buildFocusableButton(
+              label: 'Profile',
+              context: context,
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  // Goes to the Profile page
                   MaterialPageRoute(
                       builder: (context) => const ProfilePage(
                           appBarBuilder: buildAppBar, username: "admin")),
                 );
               },
-              child: const Text(
-                'Profile',
-                style: TextStyle(color: Colors.white),
-              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.search, color: Colors.white),
+            _buildFocusableIconButton(
+              icon: Icons.search,
+              context: context,
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  // goes to the Search page
                   MaterialPageRoute(
                       builder: (context) =>
                           ShopPage(appBarBuilder: buildAppBar)),
                 );
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.shopping_cart, color: Colors.white),
+            _buildFocusableIconButton(
+              icon: Icons.shopping_cart,
+              context: context,
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -87,6 +79,50 @@ AppBar buildAppBar(BuildContext context) {
           ],
         ),
       ],
+    ),
+  );
+}
+
+// Helper function for focusable TextButton
+Widget _buildFocusableButton({
+  required String label,
+  required BuildContext context,
+  required VoidCallback onPressed,
+}) {
+  return MouseRegion(
+    child: Focus(
+      child: TextButton(
+        onPressed: onPressed,
+        style: ButtonStyle(
+          foregroundColor: MaterialStateColor.resolveWith((states) {
+            if (states.contains(MaterialState.focused) ||
+                states.contains(MaterialState.hovered)) {
+              return Colors.deepOrangeAccent; // Highlighted color
+            }
+            return Colors.white; // Default color
+          }),
+        ),
+        child: Text(label),
+      ),
+    ),
+  );
+}
+
+// Helper function for focusable IconButton
+Widget _buildFocusableIconButton({
+  required IconData icon,
+  required BuildContext context,
+  required VoidCallback onPressed,
+}) {
+  return MouseRegion(
+    child: Focus(
+      child: IconButton(
+        icon: Icon(icon),
+        onPressed: onPressed,
+        color: Colors.white,
+        iconSize: 24.0,
+        splashColor: Colors.blue,
+      ),
     ),
   );
 }
@@ -154,18 +190,3 @@ Widget buildBottom() {
 }
 
 /// End of Global AppBar global method
-
-/// 
-/// Unused imports/code:
-///
-
-// import 'cart_editor.dart';
-// TextButton(onPressed: () {
-//                Navigator.pushReplacement(
-//                  context,
-  //                // goes to the Search page
-    //              MaterialPageRoute(
-      //                builder: (context) =>
-        //                  CartEditorPage()),
-          //      );
-            //  }, 

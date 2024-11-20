@@ -1,0 +1,1155 @@
+{
+   "checksum": "730d44ddf2eaa738e50c36dbc96687ec",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13376549485508597",
+            "date_last_used": "0",
+            "guid": "9debb8ae-41ca-46ff-ae8a-a042811cc49d",
+            "id": "152",
+            "name": "McAfee Security",
+            "type": "url",
+            "url": "https://www.mcafee.com/consumer/v/browserfav/dell.html"
+         }, {
+            "date_added": "13376534762706274",
+            "date_last_used": "0",
+            "guid": "ad86e5e7-a7e4-4a25-843a-cd39eef37543",
+            "id": "149",
+            "name": "McAfee Security",
+            "type": "url",
+            "url": "https://www.mcafee.com/consumer/v/browserfav/dell.html"
+         }, {
+            "date_added": "13208422332190475",
+            "date_last_used": "0",
+            "guid": "261d85f3-3cc8-492c-910f-a83fb00f9241",
+            "id": "22",
+            "name": "YouTube",
+            "type": "url",
+            "url": "https://www.youtube.com/"
+         }, {
+            "date_added": "13208422349451284",
+            "date_last_used": "0",
+            "guid": "3cffe0c3-1336-4419-87c9-f6a374a328f2",
+            "id": "23",
+            "name": "Gmail",
+            "type": "url",
+            "url": "https://mail.google.com/mail/u/0/#"
+         }, {
+            "date_added": "13232507314339333",
+            "date_last_used": "0",
+            "guid": "8e871ff2-75a4-40bb-9a6a-65aeb1d4b339",
+            "id": "24",
+            "name": "Pokemon TV",
+            "type": "url",
+            "url": "https://watch.pokemon.com/en-us/"
+         }, {
+            "date_added": "13233102015343956",
+            "date_last_used": "0",
+            "guid": "38bd43bb-81e1-45a2-9089-5fe5868719e9",
+            "id": "25",
+            "name": "Google Docs",
+            "type": "url",
+            "url": "https://docs.google.com/document/u/0/"
+         }, {
+            "date_added": "13233187252211281",
+            "date_last_used": "0",
+            "guid": "e3ab3133-9c16-4cad-b3cf-0b3ae9d334a6",
+            "id": "26",
+            "name": "Desmos | Graphing Calculator",
+            "type": "url",
+            "url": "https://www.desmos.com/calculator"
+         }, {
+            "date_added": "13234132678446598",
+            "date_last_used": "13318739264212149",
+            "guid": "c21ca0e1-687f-4570-8bf8-87350333a9e9",
+            "id": "27",
+            "name": "My Drive - Google Drive",
+            "type": "url",
+            "url": "https://drive.google.com/drive/my-drive"
+         }, {
+            "date_added": "13234468569715401",
+            "date_last_used": "0",
+            "guid": "dd3c52e5-3a8f-466e-86f3-5472a3ae8cf2",
+            "id": "28",
+            "name": "MyCanyons",
+            "type": "url",
+            "url": "https://my.canyons.edu/WebAdvisor/WebAdvisor?TYPE=M&PID=CORE-WBMAIN&TOKENIDX=5129079417"
+         }, {
+            "date_added": "13236231999101416",
+            "date_last_used": "0",
+            "guid": "1ee81ce3-5da6-40d7-bc4a-6244687c43cd",
+            "id": "29",
+            "name": "College of the Canyons Home",
+            "type": "url",
+            "url": "https://www.canyons.edu/"
+         }, {
+            "date_added": "13236397246055226",
+            "date_last_used": "0",
+            "guid": "af6833d9-8f48-483e-9d75-1e4fcee70f42",
+            "id": "30",
+            "name": "Intersegmental General Education Transfer Curriculum",
+            "type": "url",
+            "url": "https://www.canyons.edu/_resources/documents/studentservices/counseling/top10/IGETC20182019.pdf"
+         }, {
+            "date_added": "13236404426269512",
+            "date_last_used": "13314419105220051",
+            "guid": "391dd2c8-f66b-4c68-8cfd-56a40605eb83",
+            "id": "31",
+            "name": "Mail - John Paul Chua - Outlook",
+            "type": "url",
+            "url": "https://outlook.office.com/mail/inbox"
+         }, {
+            "date_added": "13239402433350199",
+            "date_last_used": "0",
+            "guid": "6555cd79-cc75-419c-89b5-4ec77208dd5c",
+            "id": "32",
+            "name": "Computer Science, B.S.",
+            "type": "url",
+            "url": "https://catalog.csun.edu/academics/comp/programs/bs-computer-science/"
+         }, {
+            "date_added": "13285980203940670",
+            "date_last_used": "0",
+            "guid": "72335bd1-3b6e-43e0-ab3f-df843dedd3bd",
+            "id": "33",
+            "name": "Google",
+            "type": "url",
+            "url": "https://www.google.com/"
+         }, {
+            "date_added": "13287177183800425",
+            "date_last_used": "0",
+            "guid": "64252ffb-e1a1-472d-840c-106902067a39",
+            "id": "34",
+            "name": "Chapter 11_ Using Language Well Version 6.pdf",
+            "type": "url",
+            "url": "file:///C:/Users/johnp/Documents/COC%20Winter%202022/FUNdamentals%20of%20Communication/Chapter/Chapter%2011_%20Using%20Language%20Well%20Version%206.pdf"
+         }, {
+            "date_added": "13245978351530867",
+            "date_last_used": "0",
+            "guid": "3e06b39c-063a-4100-9770-66826ba23ef6",
+            "id": "35",
+            "name": "Twitch",
+            "type": "url",
+            "url": "https://www.twitch.tv/"
+         }, {
+            "date_added": "13242410845548311",
+            "date_last_used": "0",
+            "guid": "57be7947-4c95-4aab-872d-1146607e470c",
+            "id": "36",
+            "name": "Reddit",
+            "type": "url",
+            "url": "https://www.reddit.com/"
+         }, {
+            "date_added": "13233102015343956",
+            "date_last_used": "0",
+            "guid": "0b48aacf-740c-40b0-98e3-e79c95ca4715",
+            "id": "37",
+            "name": "Docs",
+            "type": "url",
+            "url": "https://docs.google.com/document/u/0/"
+         }, {
+            "date_added": "13234132678446598",
+            "date_last_used": "0",
+            "guid": "0ee017b1-5a22-481e-9a28-f0b8f1d12bd0",
+            "id": "38",
+            "name": "Drive",
+            "type": "url",
+            "url": "https://drive.google.com/drive/my-drive"
+         }, {
+            "date_added": "13242695829058326",
+            "date_last_used": "0",
+            "guid": "327b905a-60eb-4aec-bddb-1c47d1a1cb84",
+            "id": "39",
+            "name": "Canvas",
+            "type": "url",
+            "url": "https://coc.instructure.com/"
+         }, {
+            "date_added": "13245830273298355",
+            "date_last_used": "0",
+            "guid": "d8455815-d690-45a3-9400-223188b74590",
+            "id": "40",
+            "name": "Calendar",
+            "type": "url",
+            "url": "https://coc.instructure.com/calendar#view_name=month&view_start=2021-05-24"
+         }, {
+            "date_added": "13236231999101416",
+            "date_last_used": "0",
+            "guid": "d754f502-72b8-401f-ae14-6919baede4ba",
+            "id": "41",
+            "name": "COC Main",
+            "type": "url",
+            "url": "https://www.canyons.edu/"
+         }, {
+            "date_added": "13236404426269512",
+            "date_last_used": "0",
+            "guid": "4700712e-ef8c-4ed5-b567-8f7deebe9219",
+            "id": "42",
+            "name": "COC Mail",
+            "type": "url",
+            "url": "https://outlook.office.com/mail/inbox"
+         }, {
+            "date_added": "13242786830551570",
+            "date_last_used": "0",
+            "guid": "be698256-3e90-442c-9396-896517ab27ec",
+            "id": "43",
+            "name": "Word",
+            "type": "url",
+            "url": "https://www.office.com/launch/word?auth=2"
+         }, {
+            "date_added": "13283636381737941",
+            "date_last_used": "0",
+            "guid": "ca155e47-23ad-4f7e-9d55-5d88be884e45",
+            "id": "44",
+            "name": "Cal State Apply",
+            "type": "url",
+            "url": "https://calstate.liaisoncas.com/applicant-ux/#/login"
+         }, {
+            "date_added": "13284147860021147",
+            "date_last_used": "0",
+            "guid": "5be655b7-da04-43b1-ae75-5446968908cf",
+            "id": "45",
+            "name": "CSUN Campus Web Portal",
+            "type": "url",
+            "url": "https://mynorthridge.csun.edu/psp/PANRPRD/EMPLOYEE/EMPL/h/?tab=NRPA_W2_HP_3C"
+         }, {
+            "date_added": "13284145904915560",
+            "date_last_used": "0",
+            "guid": "b02ffd26-1131-4e31-ae26-4dd7a2577b0e",
+            "id": "46",
+            "name": "Genshin Impact Official Calculator",
+            "type": "url",
+            "url": "https://webstatic-sea.mihoyo.com/ys/event/calculator-sea/index.html?bbs_presentation_style=fullscreen&bbs_auth_required=true&utm_source=ingame&utm_medium=notice&lang=en&device_type=pc&ext=%7b%22loc%22%3a%7b%22x%22%3a-3085.69287109375%2c%22y%22%3a252.32952880859376%2c%22z%22%3a-4417.96044921875%7d%2c%22platform%22%3a%22WinST%22%7d&game_version=OSRELWin2.3.0_R5134813_S5082883_D5220062&plat_type=pc#/"
+         }, {
+            "date_added": "13286431683655001",
+            "date_last_used": "0",
+            "guid": "0cafc3cc-5f40-4ab7-8464-247a897a614b",
+            "id": "47",
+            "name": "Exer",
+            "type": "url",
+            "url": "https://exervirtualline.com/"
+         }, {
+            "date_added": "13273771635768599",
+            "date_last_used": "0",
+            "guid": "a1ebb48b-080f-4e74-a976-88c503de4c0b",
+            "id": "48",
+            "name": "Student",
+            "type": "url",
+            "url": "https://wa.canyons.edu/WebAdvisor/WebAdvisor?TOKENIDX=1738842264&type=M&constituency=XWBS&pid=CORE-XWBS"
+         }, {
+            "date_added": "13262896716182971",
+            "date_last_used": "0",
+            "guid": "f63d7866-a240-47f6-a66c-3ae13863c582",
+            "id": "49",
+            "name": "Quickly!!!!",
+            "type": "url",
+            "url": "file:///C:/Users/johnp/Desktop/Quick%20and%20Easy.html"
+         }, {
+            "date_added": "13242787931521488",
+            "date_last_used": "0",
+            "guid": "ccb2f5c7-685c-4958-b98b-ddcc8d8c16f3",
+            "id": "50",
+            "name": "The American Yawp",
+            "type": "url",
+            "url": "http://www.americanyawp.com/"
+         }, {
+            "date_added": "13242851521794080",
+            "date_last_used": "0",
+            "guid": "1e9b375a-2b70-4caa-9b67-e6005b375430",
+            "id": "51",
+            "name": "College1",
+            "type": "url",
+            "url": "https://college1.com/classes/main.php"
+         }, {
+            "date_added": "13274200482945966",
+            "date_last_used": "0",
+            "guid": "3f642609-1692-4033-ae5f-d322ad871d33",
+            "id": "52",
+            "name": "MyCanyons",
+            "type": "url",
+            "url": "https://m.canyons.edu/campusm/home#menu"
+         }, {
+            "date_added": "13270233737246798",
+            "date_last_used": "0",
+            "guid": "081e84d0-b9bf-47b7-b68a-4353eec7a7be",
+            "id": "53",
+            "name": "Pokemon Showdown!",
+            "type": "url",
+            "url": "https://play.pokemonshowdown.com/"
+         }, {
+            "date_added": "13263277400381020",
+            "date_last_used": "0",
+            "guid": "88fe0856-eb0f-43b0-8d0c-ee9bfef84c63",
+            "id": "54",
+            "name": "LERIS | Professional Regulation Commission",
+            "type": "url",
+            "url": "https://online.prc.gov.ph/Profile"
+         }, {
+            "date_added": "13257363248934392",
+            "date_last_used": "0",
+            "guid": "09e7b858-7d33-4bb6-a07b-98e6a96c1711",
+            "id": "55",
+            "name": "Electronic library. Download books free. Finding books",
+            "type": "url",
+            "url": "https://1lib.us/"
+         }, {
+            "date_added": "13244576649874310",
+            "date_last_used": "0",
+            "guid": "e7039426-1262-42bb-aecd-04094d7d4047",
+            "id": "56",
+            "name": "Library - COC",
+            "type": "url",
+            "url": "https://www.canyons.edu/academics/library/index.php"
+         }, {
+            "date_added": "13246427268868994",
+            "date_last_used": "0",
+            "guid": "def08725-f056-4ee6-b40b-500ad87526de",
+            "id": "57",
+            "name": "A-Z Databases (COC)",
+            "type": "url",
+            "url": "https://canyons.libguides.com/az.php"
+         }, {
+            "date_added": "13246301656768934",
+            "date_last_used": "0",
+            "guid": "1101d1e0-502e-4a75-a213-6b9fc6e95bf6",
+            "id": "58",
+            "name": "Google Scholar",
+            "type": "url",
+            "url": "https://scholar.google.com/"
+         }, {
+            "date_added": "13244269829518832",
+            "date_last_used": "0",
+            "guid": "f513b966-2fc8-400e-a9bd-9e1ffb7d5762",
+            "id": "59",
+            "name": "Lumin PDF",
+            "type": "url",
+            "url": "https://app.luminpdf.com/documents"
+         }, {
+            "date_added": "13248758416470722",
+            "date_last_used": "0",
+            "guid": "79c46744-62f8-4023-bb58-7c0bc6335e0e",
+            "id": "60",
+            "name": "Google Slides",
+            "type": "url",
+            "url": "https://docs.google.com/presentation/u/0/"
+         }, {
+            "date_added": "13246996039983718",
+            "date_last_used": "0",
+            "guid": "47ac1173-ccdb-405d-8cb8-ac57eed956fc",
+            "id": "61",
+            "name": "Your Sets | Quizlet",
+            "type": "url",
+            "url": "https://quizlet.com/latest"
+         }, {
+            "date_added": "13246996286739656",
+            "date_last_used": "0",
+            "guid": "eae59903-2e1d-4a32-86c7-54aebfc42585",
+            "id": "62",
+            "name": "aslerma1 | Quizlet",
+            "type": "url",
+            "url": "https://quizlet.com/aslerma1"
+         }, {
+            "date_added": "13244618264054029",
+            "date_last_used": "0",
+            "guid": "0dfdfd4c-a93b-4ec6-9e52-b168f37be475",
+            "id": "63",
+            "name": "Live Radio - Lofi - Study Beats",
+            "type": "url",
+            "url": "https://www.youtube.com/watch?v=5qap5aO4i9A"
+         }, {
+            "date_added": "13246157002799005",
+            "date_last_used": "0",
+            "guid": "0a93b447-b95b-431c-bdf9-eb9c2bd08e0e",
+            "id": "64",
+            "name": "(18) Lazy Sunday 💤 - [lofi hip hop/chill beats] - YouTube",
+            "type": "url",
+            "url": "https://www.youtube.com/watch?v=zFhfksjf_mY"
+         }, {
+            "date_added": "13245898387832735",
+            "date_last_used": "0",
+            "guid": "5ccc04af-461d-4bd8-88c9-adb21bf01667",
+            "id": "65",
+            "name": "(3) 3 A.M Study Session 📚 - [lofi hip hop/chill beats] - YouTube",
+            "type": "url",
+            "url": "https://www.youtube.com/watch?v=BTYAsjAVa3I"
+         }, {
+            "date_added": "13244660402340778",
+            "date_last_used": "0",
+            "guid": "025e968c-8df8-4969-ab90-ecba1ce7b584",
+            "id": "66",
+            "name": "Owl House EndCred Lofi (1)",
+            "type": "url",
+            "url": "https://www.youtube.com/watch?v=XDMRdZUJgmI"
+         }, {
+            "date_added": "13233187252211281",
+            "date_last_used": "0",
+            "guid": "55ec11a0-316d-4b44-ac86-910b4038052c",
+            "id": "67",
+            "name": "Desmos",
+            "type": "url",
+            "url": "https://www.desmos.com/calculator"
+         }, {
+            "date_added": "13248902649110993",
+            "date_last_used": "0",
+            "guid": "a4f5519f-128f-40e5-8376-683043f43490",
+            "id": "68",
+            "name": "CashCourse | Your Real-Life Money Guide > Student > Dashboard",
+            "type": "url",
+            "url": "https://www.cashcourse.org/Student/Dashboard"
+         }, {
+            "date_added": "13246927424309502",
+            "date_last_used": "0",
+            "guid": "6551dc48-0b5d-44fb-9f8e-ddf2b9293d76",
+            "id": "69",
+            "name": "Google Jamboard",
+            "type": "url",
+            "url": "https://jamboard.google.com/"
+         }, {
+            "date_added": "13243062521027828",
+            "date_last_used": "0",
+            "guid": "5f3474b7-aa75-46c3-95b8-3b54d517ec5b",
+            "id": "70",
+            "name": "Email Template",
+            "type": "url",
+            "url": "https://medium.com/@lportwoodstacer/how-to-email-your-professor-without-being-annoying-af-cf64ae0e4087#.wcxsy6sb8"
+         }, {
+            "date_added": "13243480953661907",
+            "date_last_used": "0",
+            "guid": "31473748-eb17-4693-8251-f7bfecb0b1f3",
+            "id": "71",
+            "name": "MLA Formatting and Style Guide // Purdue Writing Lab",
+            "type": "url",
+            "url": "https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html"
+         }, {
+            "date_added": "13247295355485426",
+            "date_last_used": "0",
+            "guid": "9ed3df5a-3363-4f9c-92a3-c662a6531e79",
+            "id": "72",
+            "name": "7 Sensational Essay Hooks That Grab Readers’ Attention - Academic Writing Success",
+            "type": "url",
+            "url": "https://www.academicwritingsuccess.com/7-sensational-essay-hooks/#:~:text=So%2C%20what%20is%20a%20hook,hook%20sparks%20a%20person's%20curiosity."
+         }, {
+            "date_added": "13243728359479825",
+            "date_last_used": "0",
+            "guid": "81ef59ce-9d9b-4191-9b27-003f0dac9ab2",
+            "id": "73",
+            "name": "Comma Rules: A Quick Guide | Grammarly",
+            "type": "url",
+            "url": "https://www.grammarly.com/blog/comma/?utm_source=google&utm_medium=cpc&utm_campaign=search1blogdsa&utm_targetid=aud-834333299696:dsa-913938105056&gclid=Cj0KCQjwy8f6BRC7ARIsAPIXOjg6mmtk9LTOS5NsnDS5BFHKyQQUK-xs22F5cbmQqfVSaao4LrpHjGgaAmbkEALw_wcB"
+         }, {
+            "date_added": "13247448733691454",
+            "date_last_used": "0",
+            "guid": "31fc14a1-9384-48e1-85e2-ade92fa35d12",
+            "id": "74",
+            "name": "Canyons JobSpeaker",
+            "type": "url",
+            "url": "https://canyons.jobspeaker.com/#/jobboard/jobs"
+         }, {
+            "date_added": "13243728368778772",
+            "date_last_used": "0",
+            "guid": "850913ea-640b-4470-ae16-c3bd47a92eb5",
+            "id": "75",
+            "name": "General Essay Writing Tips - Essay Writing Center",
+            "type": "url",
+            "url": "https://www.internationalstudent.com/essay_writing/essay_tips/"
+         }, {
+            "date_added": "13243728377581454",
+            "date_last_used": "0",
+            "guid": "2fb0abb7-1017-4e9c-a9ea-8818619a5dd3",
+            "id": "76",
+            "name": "Transitions – The Writing Center • University of North Carolina at Chapel Hill",
+            "type": "url",
+            "url": "https://writingcenter.unc.edu/tips-and-tools/transitions/"
+         }, {
+            "date_added": "13246580725169074",
+            "date_last_used": "0",
+            "guid": "744846c7-6ae8-4c68-a163-5a6d48401882",
+            "id": "77",
+            "name": "Critical Thinking Questions",
+            "type": "url",
+            "url": "https://www.lavc.edu/profdev/library/docs/promotethink.aspx"
+         }, {
+            "date_added": "13243728396291028",
+            "date_last_used": "0",
+            "guid": "c8f5a967-dbf8-47d1-b05b-c1fc401e17f6",
+            "id": "78",
+            "name": "How to Write a Strong Thesis Statement - EasyBib Blog",
+            "type": "url",
+            "url": "https://www.easybib.com/guides/writing-guides/parts-of-a-paper/how-to-write-a-strong-thesis-statement/#:~:text=opinion%20is%20true.-,Example%3A,I%20have%20chosen%20a%20stance."
+         }, {
+            "date_added": "13245823560480664",
+            "date_last_used": "0",
+            "guid": "9f1c37af-3877-42e9-ae29-b9e8257cd170",
+            "id": "79",
+            "name": "6.4 Rhetorical Appeals: Logos, Pathos, and Ethos Defined – A Guide to Rhetoric, Genre, and Success in First-Year Writing",
+            "type": "url",
+            "url": "https://pressbooks.ulib.csuohio.edu/csu-fyw-rhetoric/chapter/rhetorical-strategies-building-compelling-arguments/"
+         }, {
+            "date_added": "13243745499368261",
+            "date_last_used": "0",
+            "guid": "a19f44e7-0821-4e5e-b3d9-30488aa188f8",
+            "id": "80",
+            "name": "Bibliography.com - Free citation and bibliography generator.",
+            "type": "url",
+            "url": "https://www.bibliography.com/generator/"
+         }, {
+            "date_added": "13244099302715523",
+            "date_last_used": "0",
+            "guid": "7af38d4e-5b03-4096-97ba-30aed98f911d",
+            "id": "81",
+            "name": "You are Crossref - Crossref",
+            "type": "url",
+            "url": "https://www.crossref.org/"
+         }, {
+            "date_added": "13244271515062719",
+            "date_last_used": "0",
+            "guid": "700f7973-d22e-4605-96bb-a53f8a9cd0d5",
+            "id": "82",
+            "name": "Topic Sentence Tutorial",
+            "type": "url",
+            "url": "https://examples.yourdictionary.com/examples-of-topic-sentences.html"
+         }, {
+            "date_added": "13244527002693067",
+            "date_last_used": "0",
+            "guid": "0f42f8d7-b6b2-4aaa-b45e-f6bfc4251a83",
+            "id": "83",
+            "name": "Thesis Statemen Guide",
+            "type": "url",
+            "url": "https://owl.purdue.edu/owl/general_writing/the_writing_process/thesis_statement_tips.html#:~:text=Your%20thesis%20statement%20should%20be,first%20paragraph%20of%20a%20paper."
+         }, {
+            "date_added": "13253298832604878",
+            "date_last_used": "0",
+            "guid": "c6b873a3-8318-492a-b132-d028a9935bc2",
+            "id": "84",
+            "name": "CodoniX Portal",
+            "type": "url",
+            "url": "https://www.codonixnotes.com/codonix-app/js/MU2Portal.exer.html"
+         }, {
+            "date_added": "13244667007962590",
+            "date_last_used": "0",
+            "guid": "9c6e7190-24db-4eac-98ad-08ab3c265fa8",
+            "id": "85",
+            "name": "Pokémon Sword or Shield: version differences and exclusives explained | TechRadar",
+            "type": "url",
+            "url": "https://www.techradar.com/how-to/how-to-decide-between-pokemon-sword-and-shield-exclusives-and-gym-leaders-explained"
+         }, {
+            "date_added": "13245570531779163",
+            "date_last_used": "0",
+            "guid": "ec839c9e-565e-4dde-8781-89ec1df566e9",
+            "id": "86",
+            "name": "Home - Roblox",
+            "type": "url",
+            "url": "https://web.roblox.com/home?nl=true"
+         }, {
+            "date_added": "13244918738487452",
+            "date_last_used": "0",
+            "guid": "a6b28c66-8005-46a4-a9ad-f9d9c505df6a",
+            "id": "87",
+            "name": "(3) Games - Roblox",
+            "type": "url",
+            "url": "https://web.roblox.com/games#/"
+         }, {
+            "date_added": "13244056155346774",
+            "date_last_used": "0",
+            "guid": "65704f6c-0951-4be8-b12d-091de76a37e0",
+            "id": "88",
+            "name": "Discord",
+            "type": "url",
+            "url": "https://discord.com/channels/@me"
+         }, {
+            "date_added": "13248506522394095",
+            "date_last_used": "0",
+            "guid": "785f9e8a-3482-43b6-981e-b4956dce3d3e",
+            "id": "89",
+            "name": "Home / Twitter",
+            "type": "url",
+            "url": "https://twitter.com/home"
+         }, {
+            "date_added": "13245458868106510",
+            "date_last_used": "0",
+            "guid": "34631c7e-e28a-42d5-9685-243b1e53abf6",
+            "id": "90",
+            "name": "AI Dungeon",
+            "type": "url",
+            "url": "https://play.aidungeon.io/main/landing"
+         }, {
+            "date_added": "13243848680555632",
+            "date_last_used": "0",
+            "guid": "ce53ada8-c747-4134-90f1-362286ee8377",
+            "id": "91",
+            "name": "Ore List - Echoes",
+            "type": "url",
+            "url": "https://www.pockettactics.com/eve-echoes/mining"
+         }, {
+            "date_added": "13246000193386676",
+            "date_last_used": "0",
+            "guid": "b450d28b-f695-475a-b7ad-5b634d506650",
+            "id": "92",
+            "name": "Trying to display URL image in JFrame - Stack Overflow",
+            "type": "url",
+            "url": "https://stackoverflow.com/questions/13448368/trying-to-display-url-image-in-jframe"
+         }, {
+            "date_added": "13245998653011735",
+            "date_last_used": "0",
+            "guid": "5d4648d1-7375-437e-9dd5-1f1178e35da8",
+            "id": "93",
+            "name": "GUI Programming - Java Programming Tutorial",
+            "type": "url",
+            "url": "https://www3.ntu.edu.sg/home/ehchua/programming/java/j4a_gui.html"
+         }, {
+            "date_added": "13246677800103371",
+            "date_last_used": "0",
+            "guid": "995987e6-e406-4d94-a4f8-9c202fed6187",
+            "id": "94",
+            "name": "Freedom From Religion group sues Alabama over ‘So help me God’ voter oath - al.com",
+            "type": "url",
+            "url": "https://www.al.com/news/2020/10/freedom-from-religion-group-sues-alabama-over-so-help-me-god-voter-oath.html"
+         }, {
+            "date_added": "13246680019711310",
+            "date_last_used": "0",
+            "guid": "7afe3446-5967-4f31-b443-532b77d41760",
+            "id": "95",
+            "name": "Police union president proposes freedom of assembly restriction - Google Search",
+            "type": "url",
+            "url": "https://www.google.com/search?q=Police+union+president+proposes+freedom+of+assembly+restriction&rlz=1C1CHBF_enUS912US912&oq=Police+union+president+proposes+freedom+of+assembly+restriction&aqs=chrome..69i57j69i59j69i60.807j0j1&sourceid=chrome&ie=UTF-8"
+         }, {
+            "date_added": "13246682831015624",
+            "date_last_used": "0",
+            "guid": "fa2a4224-3c5a-43ec-b4cb-c543e1e31848",
+            "id": "96",
+            "name": "Supreme Court Hears Case of Muslims on No-Fly List - The New York Times",
+            "type": "url",
+            "url": "https://www.nytimes.com/2020/10/06/us/politics/supreme-court-muslims-no-fly-list.html?searchResultPosition=2"
+         }, {
+            "date_added": "13246684996120738",
+            "date_last_used": "0",
+            "guid": "91f8104c-5373-437e-8d16-d1896ac019fd",
+            "id": "97",
+            "name": "EEOC sues Quest Diagnostics for religious discrimination | KLBK | KAMC | EverythingLubbock.com",
+            "type": "url",
+            "url": "https://www.everythinglubbock.com/news/local-news/eeoc-sues-quest-diagnostics-for-religious-discrimination/"
+         }, {
+            "date_added": "13247449086248935",
+            "date_last_used": "0",
+            "guid": "4f82fa81-5fb7-4d44-960c-d8cee6de5b30",
+            "id": "98",
+            "name": "Welcome to ASSIST",
+            "type": "url",
+            "url": "https://assist.org/"
+         }, {
+            "date_added": "13247610587439624",
+            "date_last_used": "0",
+            "guid": "fd6a6e62-160a-4154-8f32-17b1771fd318",
+            "id": "99",
+            "name": "Can a Sentence Start with 'And'? | Words \"Not\" to Start Sentences With | Merriam-Webster",
+            "type": "url",
+            "url": "https://www.merriam-webster.com/words-at-play/words-to-not-begin-sentences-with#:~:text=It's%20perfectly%20acceptable%20to%20begin,school%20children%20from%20stringing%20too"
+         }, {
+            "date_added": "13247782113936073",
+            "date_last_used": "0",
+            "guid": "d64b573d-1731-48c8-890b-9e7463445b29",
+            "id": "100",
+            "name": "Research Paper Topics: 50 Ideas to Get Started",
+            "type": "url",
+            "url": "https://hbculifestyle.com/research-paper-topics-50-ideas/"
+         }, {
+            "date_added": "13247859366308826",
+            "date_last_used": "0",
+            "guid": "1b87236c-6e54-456c-a2b4-8ece51849f2a",
+            "id": "101",
+            "name": "[All: amazon deforestation] AND [Journal: Journal of Geophysical Research: Atmospheres] : Search",
+            "type": "url",
+            "url": "https://agupubs.onlinelibrary.wiley.com/action/doSearch?field1=AllField&text1=Amazon+deforestation&publication%5B%5D=21698996&Ppub="
+         }, {
+            "date_added": "13247953924457445",
+            "date_last_used": "0",
+            "guid": "2f2256a2-a5e3-4219-b78a-4233f1f39dba",
+            "id": "102",
+            "name": "Books / E-books - Chicago Style Guide, for 17th Edition - LibGuides at Western Oregon University",
+            "type": "url",
+            "url": "https://research.wou.edu/c.php?g=551307&p=3785485"
+         }, {
+            "date_added": "13248492525380223",
+            "date_last_used": "0",
+            "guid": "5344a93e-c9da-40c4-be2c-007c2c9343ad",
+            "id": "103",
+            "name": "Counterargument |",
+            "type": "url",
+            "url": "https://writingcenter.fas.harvard.edu/pages/counter-argument"
+         }, {
+            "date_added": "13249781525766890",
+            "date_last_used": "0",
+            "guid": "70df9775-9968-4710-8fe7-c5559867506d",
+            "id": "104",
+            "name": "General Format // Purdue Writing Lab",
+            "type": "url",
+            "url": "https://owl.purdue.edu/owl/research_and_citation/chicago_manual_17th_edition/cmos_formatting_and_style_guide/general_format.html"
+         }, {
+            "date_added": "13250303221825054",
+            "date_last_used": "0",
+            "guid": "d0e45465-0287-4df4-b753-4d4ce21e3fd9",
+            "id": "105",
+            "name": "Chicago Style Citation",
+            "type": "url",
+            "url": "https://library.menloschool.org/chicago/book"
+         }, {
+            "date_added": "13250304602363782",
+            "date_last_used": "0",
+            "guid": "aac9226a-3f0b-4d85-81ab-a9855360acc6",
+            "id": "106",
+            "name": "Free eBooks | Project Gutenberg",
+            "type": "url",
+            "url": "https://www.gutenberg.org/"
+         }, {
+            "date_added": "13250304987340456",
+            "date_last_used": "0",
+            "guid": "dd02fc41-2636-4054-90f7-e913b7d912c8",
+            "id": "107",
+            "name": "The American Yawp",
+            "type": "url",
+            "url": "https://www.americanyawp.com/"
+         }, {
+            "date_added": "13254878605688347",
+            "date_last_used": "0",
+            "guid": "82904d6e-1d5c-4f5f-96bb-0e7b6af4ed0f",
+            "id": "108",
+            "name": "Genshin Impact Tier List (Best Characters) - Genshin.gg Wiki Database",
+            "type": "url",
+            "url": "https://genshin.gg/tier-list"
+         }, {
+            "date_added": "13255037335155022",
+            "date_last_used": "0",
+            "guid": "91a4d647-dc38-4ccf-b813-0842b34ce60b",
+            "id": "109",
+            "name": "(543) KEQING THE ELECTRO QUEEN | by Slexein - YouTube",
+            "type": "url",
+            "url": "https://www.youtube.com/watch?v=NB8Js3_Xq2o&t=0s"
+         }, {
+            "date_added": "13259984609293743",
+            "date_last_used": "0",
+            "guid": "b5e6e82d-dc43-438d-ba4a-507a5ac41ba8",
+            "id": "110",
+            "name": "Online C Compiler - online editor",
+            "type": "url",
+            "url": "https://www.onlinegdb.com/online_c_compiler"
+         }, {
+            "date_added": "13260256072783083",
+            "date_last_used": "0",
+            "guid": "1e551142-7f51-450e-8997-6aa014aee51f",
+            "id": "111",
+            "name": "(4) If you could change the ending of a movie that you thought was wrong, what was that movie and how would you end it? - Quora",
+            "type": "url",
+            "url": "https://www.quora.com/If-you-could-change-the-ending-of-a-movie-that-you-thought-was-wrong-what-was-that-movie-and-how-would-you-end-it"
+         }, {
+            "date_added": "13260578047096433",
+            "date_last_used": "0",
+            "guid": "062cafa6-3b4a-4856-952b-895856ae64ff",
+            "id": "112",
+            "name": "List of limits - Wikipedia",
+            "type": "url",
+            "url": "https://en.wikipedia.org/wiki/List_of_limits"
+         }, {
+            "date_added": "13262143961366922",
+            "date_last_used": "0",
+            "guid": "73db87ca-46fb-40f7-979d-931cc2afe293",
+            "id": "113",
+            "name": "Crunchyroll",
+            "type": "url",
+            "url": "https://beta.crunchyroll.com/"
+         }, {
+            "date_added": "13262671158284579",
+            "date_last_used": "0",
+            "guid": "9e631f9b-7e94-4f6a-bc09-a1c73b49b028",
+            "id": "114",
+            "name": "Genshin Impact Meta Slave",
+            "type": "url",
+            "url": "https://impact.moe/"
+         }, {
+            "date_added": "13262754175544808",
+            "date_last_used": "0",
+            "guid": "55ee4e4f-50f3-4ac6-924f-2cde76502210",
+            "id": "115",
+            "name": "23. The Great Depression | THE AMERICAN YAWP",
+            "type": "url",
+            "url": "http://www.americanyawp.com/text/23-the-great-depression/#VII_Franklin_Delano_Roosevelt_and_the_First_New_Deal"
+         }, {
+            "date_added": "13264017069462566",
+            "date_last_used": "0",
+            "guid": "122e6f44-0440-4367-9b34-607cc4728e59",
+            "id": "116",
+            "name": "Teyvat Interactive Map",
+            "type": "url",
+            "url": "https://webstatic-sea.mihoyo.com/app/ys-map-sea/index.html?lang=en-us#/map/2?shown_types=5&center=993.00,-303.00&zoom=-1.00"
+         }, {
+            "date_added": "13264898311465286",
+            "date_last_used": "0",
+            "guid": "c0dc0e0e-f077-4388-9fb0-9b6e2e658c32",
+            "id": "117",
+            "name": "26. The Affluent Society | THE AMERICAN YAWP",
+            "type": "url",
+            "url": "http://www.americanyawp.com/text/26-the-affluent-society/"
+         }, {
+            "date_added": "13265307281009617",
+            "date_last_used": "0",
+            "guid": "0b1256d6-12ed-48c7-8e96-ff858f64645b",
+            "id": "118",
+            "name": "Introduction to polar coordinates - Ximera",
+            "type": "url",
+            "url": "https://ximera.osu.edu/mooculus/calculus2/introductionToPolarCoordinates/digInIntroductionToPolarCoordinates"
+         }, {
+            "date_added": "13267767583418685",
+            "date_last_used": "0",
+            "guid": "494ebbeb-b0b4-4d2c-8709-f82580e8146a",
+            "id": "119",
+            "name": "CHARGE PS4 TO PC",
+            "type": "url",
+            "url": "https://www.blogtechtips.com/2018/07/07/charge-your-ps4-controller-on-your-computer/"
+         }, {
+            "children": [ {
+               "children": [ {
+                  "date_added": "13274408296518895",
+                  "date_last_used": "0",
+                  "guid": "8ce950dc-8f10-45c7-8d49-5bd979eae449",
+                  "id": "122",
+                  "name": "Dashboard",
+                  "type": "url",
+                  "url": "https://coc.instructure.com/"
+               }, {
+                  "date_added": "13274408296519059",
+                  "date_last_used": "0",
+                  "guid": "59a2c06e-ad41-492c-b043-2d6d3ca1dcd1",
+                  "id": "123",
+                  "name": "Lab 1 - Intro to Pivot",
+                  "type": "url",
+                  "url": "https://coc.instructure.com/courses/31356/assignments/893355?module_item_id=2088037"
+               }, {
+                  "date_added": "13274408296519207",
+                  "date_last_used": "0",
+                  "guid": "38d1d1bf-ebe6-4815-b0d5-f3cbce8bda2e",
+                  "id": "124",
+                  "name": "Classes | Pivot Interactives",
+                  "type": "url",
+                  "url": "https://app.pivotinteractives.com/classes"
+               }, {
+                  "date_added": "13274408296519325",
+                  "date_last_used": "0",
+                  "guid": "e9658340-2408-4440-8e73-991dfd845bbd",
+                  "id": "125",
+                  "name": "Using the Data Table and Graphing Tool | Pivot Interactives Help Center",
+                  "type": "url",
+                  "url": "https://help.pivotinteractives.com/en/articles/3389718-using-the-data-table-and-graphing-tool"
+               }, {
+                  "date_added": "13274408296519494",
+                  "date_last_used": "0",
+                  "guid": "a6e82fb7-f065-4e05-a0dc-738e93086f37",
+                  "id": "126",
+                  "name": "Topic: Class Meeting Tomorrow",
+                  "type": "url",
+                  "url": "https://coc.instructure.com/courses/31356/discussion_topics/596008"
+               }, {
+                  "date_added": "13274408296519618",
+                  "date_last_used": "0",
+                  "guid": "482f330e-ce90-4eac-b86e-4ffc24b59e2c",
+                  "id": "127",
+                  "name": "Chapter 2 Lecture: Kinematic Examples: Mechanics of Solids and Fluids - 2021FA:56595",
+                  "type": "url",
+                  "url": "https://coc.instructure.com/courses/31356/pages/chapter-2-lecture-kinematic-examples?module_item_id=2088040"
+               }, {
+                  "date_added": "13274408296519766",
+                  "date_last_used": "0",
+                  "guid": "b40ecf9d-4e73-4e28-b67f-b32934e85586",
+                  "id": "128",
+                  "name": "2.4: Significant Figures in Calculations - Chemistry LibreTexts",
+                  "type": "url",
+                  "url": "https://chem.libretexts.org/Bookshelves/Introductory_Chemistry/Map%3A_Introductory_Chemistry_(Tro)/02%3A_Measurement_and_Problem_Solving/2.04%3A_Significant_Figures_in_Calculations"
+               }, {
+                  "date_added": "13274408296519917",
+                  "date_last_used": "0",
+                  "guid": "3928e8c5-1c19-408d-a27e-25831d6ed9bc",
+                  "id": "129",
+                  "name": "Desmos | Graphing Calculator",
+                  "type": "url",
+                  "url": "https://www.desmos.com/calculator"
+               }, {
+                  "date_added": "13274408296520067",
+                  "date_last_used": "0",
+                  "guid": "05a88a77-d2ef-414e-819c-55d1aab793f8",
+                  "id": "130",
+                  "name": "Search Results",
+                  "type": "url",
+                  "url": "https://www.canyons.edu/search/?q=canyons+hall"
+               }, {
+                  "date_added": "13274408296520186",
+                  "date_last_used": "0",
+                  "guid": "8e7408ee-ae75-4baf-97e4-cd4444e94633",
+                  "id": "131",
+                  "name": "(218) Genshin Impact - Inazuma City Soundtrack (3 Version) | v2.0 Inazuma OST - YouTube",
+                  "type": "url",
+                  "url": "https://www.youtube.com/watch?v=a9KMBfrZOII"
+               }, {
+                  "date_added": "13274408296520323",
+                  "date_last_used": "0",
+                  "guid": "02ae33d1-d890-48cb-a997-257911fdef83",
+                  "id": "132",
+                  "name": "Elementary Linear Algebra: Applications Version, 11th Edition",
+                  "type": "url",
+                  "url": "file:///C:/Users/johnp/Desktop/Elementary%20Linear%20Algebra,%20Applications%20Version.pdf"
+               }, {
+                  "date_added": "13274408296520453",
+                  "date_last_used": "0",
+                  "guid": "e8d2e9a3-f591-416c-972a-acf2db42e622",
+                  "id": "133",
+                  "name": "How to Save All Your Current Tabs in Chrome for Reading Later",
+                  "type": "url",
+                  "url": "https://www.howtogeek.com/250852/how-to-save-all-your-current-tabs-in-chrome-for-reading-later/"
+               }, {
+                  "date_added": "13289365850015107",
+                  "date_last_used": "0",
+                  "guid": "52e70259-ec82-434d-9a4e-10785c93cdb5",
+                  "id": "134",
+                  "name": "Philip B. Meggs, Alston W. Purvis - Meggs' History of Graphic Design (2016, Wiley) - libgen.lc.pdf",
+                  "type": "url",
+                  "url": "file:///C:/Users/johnp/Documents/COC%20Spring%202022/GMD%20120/Philip%20B.%20Meggs,%20Alston%20W.%20Purvis%20-%20Meggs'%20History%20of%20Graphic%20Design%20(2016,%20Wiley)%20-%20libgen.lc.pdf"
+               }, {
+                  "date_added": "13292992672549028",
+                  "date_last_used": "0",
+                  "guid": "dae155bd-5dcc-47f8-a25c-cebea3d84820",
+                  "id": "135",
+                  "name": "*The ITALK project.pdf",
+                  "type": "url",
+                  "url": "file:///C:/Users/johnp/Documents/COC%20Spring%202022/PSYCH%20126/The%20ITALK%20project.pdf"
+               }, {
+                  "date_added": "13297125689897111",
+                  "date_last_used": "0",
+                  "guid": "62c9e4dd-03f9-48d3-aa55-f51aafd17f61",
+                  "id": "136",
+                  "name": "Attention 3ed new SE.pdf",
+                  "type": "url",
+                  "url": "file:///C:/Users/johnp/Documents/COC%20Spring%202022/PSYCH%20126/Exam%20Attention%20and%20Perception/Attention%203ed%20new%20SE.pdf"
+               }, {
+                  "date_added": "13374789937026149",
+                  "date_last_used": "0",
+                  "guid": "521d0da4-79a5-4c33-814e-64a78d8b3487",
+                  "id": "137",
+                  "meta_info": {
+                     "power_bookmark_meta": ""
+                  },
+                  "name": "THE AUGMENTED Knowledge Workshop.pdf",
+                  "type": "url",
+                  "url": "file:///C:/Users/johnp/Downloads/CSUN_Fall_2024/COMP_585/Resources/Douglas%20Files/THE%20AUGMENTED%20Knowledge%20Workshop.pdf"
+               } ],
+               "date_added": "13288819978464350",
+               "date_last_used": "0",
+               "date_modified": "13374789937026149",
+               "guid": "b72c3bcf-54a8-49a1-825a-a604d20b2ed6",
+               "id": "121",
+               "name": "New folder",
+               "type": "folder"
+            }, {
+               "date_added": "13276883323235581",
+               "date_last_used": "0",
+               "guid": "8511807e-e0bc-4593-af15-fa55a57409d1",
+               "id": "138",
+               "name": "Desmos | Scientific Calculator",
+               "type": "url",
+               "url": "https://www.desmos.com/scientific"
+            } ],
+            "date_added": "13288819978464284",
+            "date_last_used": "0",
+            "date_modified": "13288819978464284",
+            "guid": "29c27550-20d9-4e3e-b683-467eeba49a85",
+            "id": "120",
+            "name": "PHSYCS 220",
+            "type": "folder"
+         }, {
+            "date_added": "13288811546263272",
+            "date_last_used": "0",
+            "guid": "54ea2ca4-657e-43e6-a81f-cfbd217075d8",
+            "id": "139",
+            "name": "Google Feud",
+            "type": "url",
+            "url": "https://www.googlefeud.com/"
+         }, {
+            "children": [ {
+               "date_added": "13282960964035321",
+               "date_last_used": "0",
+               "guid": "6f74ed57-508e-4c0c-83aa-ef8ff02b3a84",
+               "id": "141",
+               "name": "Dell Auction",
+               "type": "url",
+               "url": "http://www.dellauction.com/"
+            }, {
+               "date_added": "13282960964035321",
+               "date_last_used": "0",
+               "guid": "edd48471-e19f-4301-80b8-894becf1a5ae",
+               "id": "142",
+               "name": "Dell",
+               "type": "url",
+               "url": "http://www.dell.com/"
+            }, {
+               "date_added": "13282960964035321",
+               "date_last_used": "0",
+               "guid": "36806897-b17b-4f37-affc-e65cb7c31429",
+               "id": "143",
+               "name": "Support.Dell.Com",
+               "type": "url",
+               "url": "http://www.dell.com/support/home"
+            } ],
+            "date_added": "13376532763994858",
+            "date_last_used": "0",
+            "date_modified": "0",
+            "guid": "b8cec513-e2c6-4f64-b018-cdb4da50aa75",
+            "id": "140",
+            "name": "Dell",
+            "type": "folder"
+         }, {
+            "date_added": "13309573705703621",
+            "date_last_used": "0",
+            "guid": "6b5ab31b-c143-4758-8a0e-0393ac07df81",
+            "id": "144",
+            "name": "The Phantom of the Opera",
+            "type": "url",
+            "url": "read://https_www.gutenberg.org/?url=https%3A%2F%2Fwww.gutenberg.org%2Ffiles%2F175%2F175-h%2F175-h.htm%23chap11"
+         }, {
+            "date_added": "13214431068422721",
+            "date_last_used": "0",
+            "guid": "8ae459e6-8eef-4b6f-901f-91cc0c7b0093",
+            "id": "145",
+            "name": "Amazon.com – Online Shopping",
+            "type": "url",
+            "url": "http://redirect.hp.com/svs/rdr?locale=en_us&c=142&bd=pavilion&tp=iefavbar&s=amazon&pf=cnnb&TYPE=4"
+         }, {
+            "date_added": "13214431067751082",
+            "date_last_used": "0",
+            "guid": "9b668afc-1551-493b-9f63-c0513fa57cc8",
+            "id": "146",
+            "name": "Priceline.com",
+            "type": "url",
+            "url": "https://book.priceline.com/ivm/inbound/?refid=8330&mk=ad50984ce44a7fcecf70bdf28b8ccba89342239bffbf4332f125f548f7865a45157a40709b512032&refclickid=websliceW1018"
+         }, {
+            "date_added": "13376532760526605",
+            "date_last_used": "0",
+            "guid": "64f2af84-15e0-42dc-9871-15efb853e98e",
+            "id": "6",
+            "name": "McAfee Security",
+            "type": "url",
+            "url": "https://www.mcafee.com/consumer/v/browserfav/dell.html"
+         } ],
+         "date_added": "13376532760350888",
+         "date_last_used": "0",
+         "date_modified": "13376549485508597",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Bookmarks bar",
+         "type": "folder"
+      },
+      "other": {
+         "children": [ {
+            "children": [ {
+               "date_added": "13214431068250900",
+               "date_last_used": "0",
+               "guid": "374ef398-8a74-4563-9fba-884911732bea",
+               "id": "15",
+               "name": "Accessories",
+               "type": "url",
+               "url": "http://js.redirect.hp.com/jumpstation?bd=all&c=181&locale=en_us&pf=cnnb&s=hp_accessories&tp=iefavs&TYPE=4"
+            }, {
+               "date_added": "13214431068250900",
+               "date_last_used": "0",
+               "guid": "0291ec3b-a869-4dcd-a831-8955c0a244e4",
+               "id": "16",
+               "name": "Amazon.com – Online Shopping",
+               "type": "url",
+               "url": "http://redirect.hp.com/svs/rdr?locale=en_us&c=142&bd=pavilion&tp=iefavbar&s=amazon&pf=cnnb&TYPE=4"
+            }, {
+               "date_added": "13214431068297761",
+               "date_last_used": "0",
+               "guid": "ded444fa-95ea-4d8b-af0e-f0058798c6e4",
+               "id": "17",
+               "name": "Best Buy",
+               "type": "url",
+               "url": "http://www.bestbuy.com/"
+            }, {
+               "date_added": "13214431068344622",
+               "date_last_used": "0",
+               "guid": "927a359d-21b3-459f-88bf-80faf391db0b",
+               "id": "18",
+               "name": "HP Store",
+               "type": "url",
+               "url": "http://redirect.hp.com/svs/rdr?TYPE=4&tp=iefavs&s=hpstore&pf=cnnb&locale=en_us&bd=all&c=181"
+            }, {
+               "date_added": "13214431067751082",
+               "date_last_used": "0",
+               "guid": "948bdf90-2ce9-452a-a9ed-73b225c182e5",
+               "id": "19",
+               "name": "Priceline.com",
+               "type": "url",
+               "url": "https://book.priceline.com/ivm/inbound/?refid=8330&mk=ad50984ce44a7fcecf70bdf28b8ccba89342239bffbf4332f125f548f7865a45157a40709b512032&refclickid=iefavW1018"
+            }, {
+               "date_added": "13214431068344622",
+               "date_last_used": "0",
+               "guid": "88e693de-5322-46c6-b76c-2b23c4e7e76a",
+               "id": "20",
+               "name": "Printing",
+               "type": "url",
+               "url": "http://redirect.hp.com/svs/rdr?TYPE=4&tp=iefavs&s=printing&pf=cnnb&locale=en_us&bd=all&c=181"
+            }, {
+               "date_added": "13214431068360241",
+               "date_last_used": "0",
+               "guid": "f8ea7e8c-7e36-4c9c-9d98-8455ccb9f3f7",
+               "id": "21",
+               "name": "Software and Driver Downloads",
+               "type": "url",
+               "url": "http://redirect.hp.com/svs/rdr?TYPE=4&tp=iefavs&s=downloads&pf=cnnb&locale=en_us&bd=all&c=181"
+            } ],
+            "date_added": "13358998667849483",
+            "date_last_used": "0",
+            "date_modified": "13358998667849483",
+            "guid": "e5fb14ba-6747-4cd1-87b9-23fe63157de8",
+            "id": "14",
+            "name": "HP",
+            "type": "folder"
+         } ],
+         "date_added": "13376532760350890",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other bookmarks",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [ {
+            "date_added": "13255080053981866",
+            "date_last_used": "0",
+            "guid": "469a51b6-8e19-4c48-947c-5bdb159e52b2",
+            "id": "11",
+            "name": "Genshin Impact Interactive World Map",
+            "type": "url",
+            "url": "https://genshin-impact-map.appsample.com/#/"
+         }, {
+            "date_added": "13257222677780368",
+            "date_last_used": "0",
+            "guid": "6274fa92-7487-4489-a252-75631e631137",
+            "id": "12",
+            "name": "Pokémon Sword and Shield type super effective and weakness chart - Polygon",
+            "type": "url",
+            "url": "https://www.polygon.com/pokemon-sword-shield-guide/2019/11/16/20968169/type-strength-weakness-super-effective-weakness-chart"
+         }, {
+            "date_added": "13257404425698073",
+            "date_last_used": "0",
+            "guid": "78c65ff4-6eca-4c29-8116-4db9c5b5f57f",
+            "id": "13",
+            "name": "Adobe Acrobat Home",
+            "type": "url",
+            "url": "https://documentcloud.adobe.com/link/home/?locale=en-US"
+         } ],
+         "date_added": "13376532760350891",
+         "date_last_used": "0",
+         "date_modified": "13257404425698073",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}
