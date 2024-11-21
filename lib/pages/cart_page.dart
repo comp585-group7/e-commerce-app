@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:json_editor_flutter/json_editor_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 
 // import pages
 import 'home_page.dart';
@@ -27,17 +29,32 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   List<dynamic> cartItems = [];
+  // ignore: non_constant_identifier_names
+  String mapping_string = 'http://localhost:5000';
 
   @override
   void initState() {
     super.initState();
+
+    if(isAndroid()) {
+      mapping_string = 'http://10.0.2.2:5000';
+    }
+
     _fetchCartItems();
+  }
+
+  // Checks for the platform if its on Android
+  bool isAndroid() {
+    if (kIsWeb) {
+      return false;
+    } else {
+      return Platform.isAndroid;
+    }
   }
 
   Future<void> _fetchCartItems() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://localhost:5000/api/cart'));
+      final response = await http.get(Uri.parse('$mapping_string/api/cart'));
       if (response.statusCode == 200) {
         setState(() {
           cartItems = jsonDecode(response.body);
@@ -52,8 +69,8 @@ class _CartPageState extends State<CartPage> {
 
   void _removeFromCart(String itemId) async {
     try {
-      final response = await http
-          .delete(Uri.parse('http://localhost:5000/api/cart/$itemId'));
+      final response =
+          await http.delete(Uri.parse('$mapping_string/api/cart/$itemId'));
       if (response.statusCode == 200) {
         setState(() {
           cartItems.removeWhere((item) => item['id'].toString() == itemId);
@@ -86,7 +103,7 @@ class _CartPageState extends State<CartPage> {
     };
 
     final response = await http.post(
-      Uri.parse('http://localhost:5000/api/cart'),
+      Uri.parse('$mapping_string/api/cart'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(updatedItem),
     );
@@ -145,31 +162,48 @@ class _CartPageState extends State<CartPage> {
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image of the cart item
-            Image.network(
-              item['image'], // Uses 'image' URL from JSON
-              width: 90.0, // Constant width
-              height: 90.0, // Constant height
-              fit: BoxFit.cover,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8), // Rounded image corners
+              child: Image.network(
+                item['image'], // Uses 'image' URL from JSON
+                width: 80.0,
+                height: 80.0,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.image_not_supported, size: 80);
+                },
+              ),
             ),
             const SizedBox(width: 8), // Spacing between image and text
+
             // Item details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Product Name
                   Text(
                     item['name'],
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis, // Handle long names
                   ),
                   const SizedBox(height: 4),
+                  // Quantity and Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const Text('Quantity: '),
                       IconButton(
                         icon: const Icon(Icons.remove),
+                        constraints: const BoxConstraints(maxHeight: 24),
+                        padding: EdgeInsets.zero, // Compact buttons
                         onPressed: () {
                           onUpdateQuantity(item['id'], item['quantity'] - 1);
                         },
@@ -177,19 +211,27 @@ class _CartPageState extends State<CartPage> {
                       Text('${item['quantity']}'),
                       IconButton(
                         icon: const Icon(Icons.add),
+                        constraints: const BoxConstraints(maxHeight: 24),
+                        padding: EdgeInsets.zero,
                         onPressed: () {
                           onUpdateQuantity(item['id'], item['quantity'] + 1);
                         },
                       ),
-                      const SizedBox(width: 16), // Spacing before price
-                      Text(
-                        'Price: \$${item['price'].toStringAsFixed(2)}',
+                      const SizedBox(width: 8), // Spacing before price
+                      Flexible(
+                        child: Text(
+                          'Price: \$${item['price'].toStringAsFixed(2)}',
+                          style: const TextStyle(fontSize: 14.0),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
+
             // Delete button
             IconButton(
               icon: const Icon(Icons.delete),

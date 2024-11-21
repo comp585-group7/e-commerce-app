@@ -1,8 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'cart_page.dart';
 import 'shop_page.dart';
@@ -71,6 +72,9 @@ void _showAddToCartDialog(BuildContext context, String message) {
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int quantity = 1; // Default quantity
 
+  // ignore: non_constant_identifier_names
+  String mapping_string = 'http://localhost:5000';  // the web mapping string is by default
+
   // Add items to the cart via the Flask API
   Future<void> _addToCart(BuildContext context, int quantity) async {
     final cartItem = {
@@ -82,8 +86,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       'desc': widget.productDescription
     };
 
+    if(isAndroid()) {
+      mapping_string = 'http://10.0.2.2:5000';
+    }
+
     final response = await http.post(
-      Uri.parse('http://localhost:5000/api/cart'),
+      Uri.parse('$mapping_string/api/cart'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(cartItem),
     );
@@ -95,6 +103,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     }
   }
 
+  // Checks for the platform if its on Android
+  bool isAndroid() {
+    if (kIsWeb) {
+      return false;
+    } else {
+      return Platform.isAndroid;
+    }
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

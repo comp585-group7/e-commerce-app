@@ -25,18 +25,3 @@ class StyleHiveApp extends StatelessWidget {
 }
 
 /// End of document
-
-///
-/// Unused imports:
-///
-
-//import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-//import 'dart:convert';
-//import 'package:flutter/services.dart' show rootBundle;
-//import 'dart:io';
-//import 'package:path_provider/path_provider.dart';
-
-//import 'package:json_editor_flutter/json_editor_flutter.dart';
-
-//import 'pages/profile_page.dart'; // Import ProfilePage
-//import 'pages/shop_page.dart'; // Import ShopPage

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:focusable_control_builder/focusable_control_builder.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 
 import 'product_details_page.dart'; // Import ProductDetailsPage
 
@@ -25,25 +27,66 @@ class _ShopPageState extends State<ShopPage> {
   List<dynamic> products = [];
   List<dynamic> searchResults = [];
   List<dynamic> categories = [];
+  // ignore: non_constant_identifier_names
+  String mapping_string = 'http://localhost:5000';  // default is web
 
   @override
   void initState() {
     super.initState();
+
+    if(isAndroid()) {
+      mapping_string = 'http://10.0.2.2:5000';
+    }
+
     loadProductData();
-    _loadCategoryData();
+    _loadCatalogData();
     searchController.addListener(() {
       filterSearchResults(searchController.text);
     });
   }
 
+  // Checks for the platform if its on Android
+  bool isAndroid() {
+    if (kIsWeb) {
+      return false;
+    } else {
+      return Platform.isAndroid;
+    }
+  }
+
   // Load category data from JSON
-  Future<void> _loadCategoryData() async {
-    final String response =
-        await rootBundle.loadString('assets/data-ctlg.json');
-    final data = await json.decode(response);
-    setState(() {
-      categories = data['categories'];
-    });
+  Future<void> _loadCatalogData() async {
+    try {
+      // Perform the GET request to fetch catalog data from the API
+      final response = await http
+          .get(Uri.parse('$mapping_string/api/products/catalog'));
+
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final data = json.decode(response.body);
+        setState(() {
+          categories = data[
+              'categories']; // Assuming the API response has a 'categories' key
+        });
+      } else {
+        // Handle non-200 status codes
+        throw Exception('Failed to load catalog data: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Fallback: Load data from a local JSON file if API fails
+      try {
+        final String fallbackResponse =
+            await rootBundle.loadString('assets/data-ctlg.json');
+        final fallbackData = json.decode(fallbackResponse);
+        setState(() {
+          categories = fallbackData['categories'];
+        });
+      } catch (fallbackError) {
+        // Log or rethrow if fallback also fails
+        print('Error loading fallback catalog data: $fallbackError');
+        throw Exception('Failed to load catalog data from API and fallback.');
+      }
+    }
   }
 
   void _scrollRight() {
@@ -65,7 +108,7 @@ class _ShopPageState extends State<ShopPage> {
   Future<void> loadProductData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:5000/api/products'));
+          await http.get(Uri.parse('$mapping_string/api/products'));
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         setState(() {
@@ -189,6 +232,7 @@ class _ShopPageState extends State<ShopPage> {
       onTap: () {
         // filter products based on category
         filterSearchResults(category);
+        searchController.text = category;
       },
       child: Card(
         elevation: 3,
@@ -213,6 +257,7 @@ class _ShopPageState extends State<ShopPage> {
                 onPressed: () {
                   // filter products based on category
                   filterSearchResults(category);
+                  searchController.text = category;
                 },
                 child: Text(category,
                     style:

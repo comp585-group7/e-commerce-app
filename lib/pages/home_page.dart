@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'product_details_page.dart'; // Import ProductDetailsPage
 import 'app_bar.dart'; // Import buildAppBar function
@@ -13,6 +15,7 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
@@ -21,22 +24,34 @@ class _HomePageState extends State<HomePage> {
 
   List<dynamic> products = [];
   List<dynamic> categories = [];
+  // ignore: non_constant_identifier_names
+  String mapping_string = 'http://localhost:5000';  // the web mapping string is by default
 
   @override
   void initState() {
     super.initState();
-    
+
+    if(isAndroid()) {
+      mapping_string = 'http://10.0.2.2:5000';
+    }
+
     _loadProductData();
-    _loadCategoryData();
+    _loadCatalogData();
+  }
+
+  // Checks for the platform if its on Android
+  bool isAndroid() {
+    if (kIsWeb) {
+      return false;
+    } else {
+      return Platform.isAndroid;
+    }
   }
 
   // Load product data from JSON
   Future<void> _loadProductData() async {
     final response = await http
-        .get(Uri.parse('http://localhost:5000/api/products/featured'));
-
-    // for android emulator
-    //final response = await http.get(Uri.parse('http://10.0.2.2:5000/api/products/featured'));
+        .get(Uri.parse('$mapping_string/api/products/featured'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -49,13 +64,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Load category data from JSON
-  Future<void> _loadCategoryData() async {
-    final String response =
-        await rootBundle.loadString('assets/data-ctlg.json');
-    final data = await json.decode(response);
-    setState(() {
-      categories = data['categories'];
-    });
+  Future<void> _loadCatalogData() async { // Catalog == Category
+    try {
+      // Perform the GET request to fetch catalog data from the API
+      final response = await http
+          .get(Uri.parse('$mapping_string/api/products/catalog'));
+
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final data = json.decode(response.body);
+        setState(() {
+          categories = data[
+              'categories']; // Assuming the API response has a 'categories' key
+        });
+      } else {
+        // Handle non-200 status codes
+        throw Exception('Failed to load catalog data: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Fallback: Load data from a local JSON file if API fails
+      try {
+        final String fallbackResponse =
+            await rootBundle.loadString('assets/data-ctlg.json');
+        final fallbackData = json.decode(fallbackResponse);
+        setState(() {
+          categories = fallbackData['categories'];
+        });
+      } catch (fallbackError) {
+        // Log or rethrow if fallback also fails
+        print('Error loading fallback catalog data: $fallbackError');
+        throw Exception('Failed to load catalog data from API and fallback.');
+      }
+    }
   }
 
   void _scrollRight() {
@@ -99,7 +139,8 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {},
-                child: Text(category, style: TextStyle(fontSize: 16.0, color: Colors.black)),
+                child: Text(category,
+                    style: TextStyle(fontSize: 16.0, color: Colors.black)),
               ),
             ],
           ),
@@ -128,7 +169,8 @@ class _HomePageState extends State<HomePage> {
               height: 250.0,
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage('https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png'),
+                  image: NetworkImage(
+                      'https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -276,7 +318,8 @@ class _HomePageState extends State<HomePage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 childAspectRatio: isSmallScreen ? 2.5 : 6.5,
-                children: List.generate(categories.length, (index) {
+                //children: List.generate(categories.length - 12, (index) {
+                children: List.generate(4, (index) {
                   var category = categories[index];
                   return _buildCategoryCard(
                       category['name'], category['image']);

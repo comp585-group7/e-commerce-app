@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'cart_page.dart';
 import 'shop_page.dart';
@@ -29,6 +31,15 @@ class CartProductPage extends StatefulWidget {
   // ignore: library_private_types_in_public_api
   _CartProductPageState createState() => _CartProductPageState();
 }
+
+// Checks for the platform if its on Android
+  bool isAndroid() {
+    if (kIsWeb) {
+      return false;
+    } else {
+      return Platform.isAndroid;
+    }
+  }
 
 // Method to show the dialog when "Add to Cart" is pressed
 void _showAddToCartDialog(BuildContext context, String message) {
@@ -98,8 +109,6 @@ void loadCartItems() async {
     print('Error: $error');
   }
 }
-
-
 
 class _CartProductPageState extends State<CartProductPage> {
   int quantity = 1; // Default quantity
@@ -232,6 +241,9 @@ class _CartProductPageState extends State<CartProductPage> {
 
             const Spacer(),
 
+            /*
+            // No need for this on the Cart product since its already on the cart already, 
+            //  we might need a new function just in case the user does want to add more onto their cart list
             // Add to Cart Button
             ElevatedButton(
               onPressed: () => _addToCart(context, quantity),
@@ -244,6 +256,7 @@ class _CartProductPageState extends State<CartProductPage> {
                 style: TextStyle(fontSize: 18.0, color: Colors.white),
               ),
             ),
+            */
           ],
         ),
       ),
