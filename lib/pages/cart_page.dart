@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:layout_basics1/old/bee_main.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:json_editor_flutter/json_editor_flutter.dart';
@@ -13,10 +14,10 @@ import 'package:flutter/foundation.dart';
 
 // import pages
 import 'home_page.dart';
+import 'product_details_page.dart';
 import 'profile_page.dart';
 import 'shop_page.dart';
 import 'checkout.dart';
-import 'cart_product_page.dart';
 
 class CartPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
@@ -273,13 +274,13 @@ class _CartPageState extends State<CartPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CartProductPage(
+                              builder: (context) => ProductDetailsPage(
                                 productName: item['name'],
                                 productDescription: item['desc'],
                                 productImage: item['image'],
                                 productPrice: item['price'],
                                 productId: int.parse(item['id']),
-                                productQuantity: item['quantity'],
+                                quantity: item['quantity']
                               ),
                             ),
                           );

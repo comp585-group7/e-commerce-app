@@ -13,10 +13,12 @@ import 'product_details_page.dart'; // Import ProductDetailsPage
 /// can we add a way to use focusable_control_builder.dart so that the shop cards are higlighted with black when hovered on
 class ShopPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
+  final String? category;
 
-  const ShopPage({super.key, required this.appBarBuilder});
+  const ShopPage({super.key, required this.appBarBuilder, this.category});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ShopPageState createState() => _ShopPageState();
 }
 
@@ -28,21 +30,43 @@ class _ShopPageState extends State<ShopPage> {
   List<dynamic> searchResults = [];
   List<dynamic> categories = [];
   // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000';  // default is web
+  String mapping_string = 'http://localhost:5000'; // default is web
 
   @override
   void initState() {
     super.initState();
 
-    if(isAndroid()) {
+    // Checks if the device is android or not
+    if (isAndroid()) {
       mapping_string = 'http://10.0.2.2:5000';
     }
 
-    loadProductData();
-    _loadCatalogData();
+    // Load products and handle category filtering asynchronously
+    _initializePage();
+
+    // Set up the search controller listener
     searchController.addListener(() {
       filterSearchResults(searchController.text);
     });
+  }
+
+  Future<void> _initializePage() async {
+    await loadProductData(); // Wait for products to load
+
+    _loadCatalogData();
+
+    // Check if the category is provided and apply the filter
+    if (widget.category != null && widget.category!.isNotEmpty) {
+      String searchTerm = widget.category!;
+
+      // Ensure products are loaded before applying the filter
+      if (products.isNotEmpty) {
+        setState(() {
+          searchController.text = searchTerm; // Set the search text
+          filterSearchResults(searchTerm); // Run the filter
+        });
+      }
+    }
   }
 
   // Checks for the platform if its on Android
@@ -58,8 +82,8 @@ class _ShopPageState extends State<ShopPage> {
   Future<void> _loadCatalogData() async {
     try {
       // Perform the GET request to fetch catalog data from the API
-      final response = await http
-          .get(Uri.parse('$mapping_string/api/products/catalog'));
+      final response =
+          await http.get(Uri.parse('$mapping_string/api/products/catalog'));
 
       if (response.statusCode == 200) {
         // Parse the JSON response
@@ -135,6 +159,49 @@ class _ShopPageState extends State<ShopPage> {
     setState(() {
       searchResults = results;
     });
+  }
+
+  Widget _buildCategoryCard(String category, String imageAsset) {
+    return GestureDetector(
+      onTap: () {
+        // filter products based on category
+        filterSearchResults(category);
+        searchController.text = category;
+      },
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 15),
+              Image.network(
+                imageAsset,
+                width: 30,
+                height: 30,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons
+                      .error); // Show an error icon in case image fails to load
+                },
+              ),
+              const SizedBox(width: 10),
+              TextButton(
+                onPressed: () {
+                  // filter products based on category
+                  filterSearchResults(category);
+                  searchController.text = category;
+                },
+                child: Text(category,
+                    style:
+                        const TextStyle(color: Colors.black, fontSize: 16.0)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildShopCard(String productName, String imageAsset,
@@ -224,49 +291,6 @@ class _ShopPageState extends State<ShopPage> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildCategoryCard(String category, String imageAsset) {
-    return GestureDetector(
-      onTap: () {
-        // filter products based on category
-        filterSearchResults(category);
-        searchController.text = category;
-      },
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(width: 15),
-              Image.network(
-                imageAsset,
-                width: 30,
-                height: 30,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons
-                      .error); // Show an error icon in case image fails to load
-                },
-              ),
-              const SizedBox(width: 10),
-              TextButton(
-                onPressed: () {
-                  // filter products based on category
-                  filterSearchResults(category);
-                  searchController.text = category;
-                },
-                child: Text(category,
-                    style:
-                        const TextStyle(color: Colors.black, fontSize: 16.0)),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

@@ -15,65 +15,64 @@ class ProductDetailsPage extends StatefulWidget {
   final String productImage;
   final double productPrice;
   final int productId;
+  final int? quantity;
 
-  const ProductDetailsPage({
-    super.key,
-    required this.productName,
-    required this.productDescription,
-    required this.productImage,
-    required this.productPrice,
-    required this.productId,
-  });
+  const ProductDetailsPage(
+      {super.key,
+      required this.productName,
+      required this.productDescription,
+      required this.productImage,
+      required this.productPrice,
+      required this.productId,
+      this.quantity});
 
   @override
   // ignore: library_private_types_in_public_api
   _ProductDetailsPageState createState() => _ProductDetailsPageState();
 }
 
-// Method to show the dialog when "Add to Cart" is pressed
-void _showAddToCartDialog(BuildContext context, String message) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(message),
-        content: const Text('Would you like to shop for more?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CartPage(appBarBuilder: buildAppBar),
-                ),
-              );
-            },
-            child: const Text('Go to Cart'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ShopPage(appBarBuilder: buildAppBar),
-                ),
-              );
-            },
-            child: const Text('Shop More'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
+  List<dynamic> cartItems = [];
   int quantity = 1; // Default quantity
+  String optionMsg = "Add to Cart";
 
   // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000';  // the web mapping string is by default
+  String mapping_string =
+      'http://localhost:5000'; // the web mapping string is by default
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (isAndroid()) {
+      mapping_string = 'http://10.0.2.2:5000';
+    }
+
+    // Initializes the page and adds a way for us to check
+    _initializePage();
+  }
+
+  Future<void> _initializePage() async {
+    await _fetchCartItems();
+
+    // Now check if the product ID exists in the cart items
+    final cartItem = cartItems.firstWhere(
+      (item) => item['id'] == widget.productId.toString(),
+      orElse: () => null, // If not found, return null
+    );
+
+    if (cartItem != null) {
+      setState(() {
+        quantity = cartItem['quantity'] ??
+            1; // Set quantity to the cart item's quantity or default to 1
+      });
+      print(
+          "Product with ID ${widget.productId} is already in the cart with quantity $quantity.");
+      optionMsg = "Update Cart";
+    } else {
+      print("Product with ID ${widget.productId} is not in the cart.");
+    }
+  }
 
   // Add items to the cart via the Flask API
   Future<void> _addToCart(BuildContext context, int quantity) async {
@@ -86,10 +85,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       'desc': widget.productDescription
     };
 
-    if(isAndroid()) {
-      mapping_string = 'http://10.0.2.2:5000';
-    }
-
     final response = await http.post(
       Uri.parse('$mapping_string/api/cart'),
       headers: {'Content-Type': 'application/json'},
@@ -101,7 +96,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     } else {
       _showAddToCartDialog(context, "Failed to add item to cart");
     }
-  }
+  } // end of _addToCart()
+
+  // We can fetch the cart, check if the item is already on the cart and checks for its quantity
+  Future<void> _fetchCartItems() async {
+    try {
+      final response = await http.get(Uri.parse('$mapping_string/api/cart'));
+      if (response.statusCode == 200) {
+        setState(() {
+          cartItems = jsonDecode(response.body);
+        });
+      } else {
+        print('Failed to load cart items');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  } // end of _fetchCartItems()
 
   // Checks for the platform if its on Android
   bool isAndroid() {
@@ -112,7 +123,45 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     }
   }
 
-  
+  // Method to show the dialog when "Add to Cart" is pressed
+  void _showAddToCartDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(message),
+          content: const Text('Would you like to shop for more?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CartPage(appBarBuilder: buildAppBar),
+                  ),
+                );
+              },
+              child: const Text('Go to Cart'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ShopPage(appBarBuilder: buildAppBar),
+                  ),
+                );
+              },
+              child: const Text('Shop More'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,17 +171,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image Carousel Section
+            // Image Section
             SizedBox(
               height: 250,
               child: PageView.builder(
-                itemCount: 3, // Display the same image multiple times for now, not working currently
+                itemCount:
+                    3, // Display the same image multiple times for now, not working currently
                 itemBuilder: (context, index) {
                   return Image.network(
                     widget.productImage,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.error); // Show an error icon if image fails to load
+                      return const Icon(Icons
+                          .error); // Show an error icon if image fails to load
                     },
                   );
                 },
@@ -223,8 +274,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 backgroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
               ),
-              child: const Text(
-                'Add to Cart',
+              child: Text(
+                optionMsg,
                 style: TextStyle(fontSize: 18.0, color: Colors.white),
               ),
             ),

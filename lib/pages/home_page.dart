@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:layout_basics1/pages/shop_page.dart';
 import 'dart:convert';
 import 'dart:io' show Platform;
 
@@ -25,13 +26,14 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> products = [];
   List<dynamic> categories = [];
   // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000';  // the web mapping string is by default
+  String mapping_string =
+      'http://localhost:5000'; // the web mapping string is by default
 
   @override
   void initState() {
     super.initState();
 
-    if(isAndroid()) {
+    if (isAndroid()) {
       mapping_string = 'http://10.0.2.2:5000';
     }
 
@@ -50,8 +52,8 @@ class _HomePageState extends State<HomePage> {
 
   // Load product data from JSON
   Future<void> _loadProductData() async {
-    final response = await http
-        .get(Uri.parse('$mapping_string/api/products/featured'));
+    final response =
+        await http.get(Uri.parse('$mapping_string/api/products/featured'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -64,11 +66,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Load category data from JSON
-  Future<void> _loadCatalogData() async { // Catalog == Category
+  Future<void> _loadCatalogData() async {
+    // Catalog == Category
     try {
       // Perform the GET request to fetch catalog data from the API
-      final response = await http
-          .get(Uri.parse('$mapping_string/api/products/catalog'));
+      final response =
+          await http.get(Uri.parse('$mapping_string/api/products/catalog'));
 
       if (response.statusCode == 200) {
         // Parse the JSON response
@@ -116,7 +119,12 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildCategoryCard(String category, String imageAsset) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ShopPage(appBarBuilder: buildAppBar, category: category,)));
+      },
       child: Card(
         color: Colors.white,
         elevation: 3,
