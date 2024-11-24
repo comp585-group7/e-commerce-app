@@ -123,7 +123,10 @@ class _HomePageState extends State<HomePage> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ShopPage(appBarBuilder: buildAppBar, category: category,)));
+                builder: (context) => ShopPage(
+                      appBarBuilder: buildAppBar,
+                      category: category,
+                    )));
       },
       child: Card(
         color: Colors.white,
@@ -352,7 +355,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'StyleHive is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
+                    'StyleHiveeeeeee is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 16.0,
