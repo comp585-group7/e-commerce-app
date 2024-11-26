@@ -13,6 +13,7 @@ dependencies:
   path_provider_ios: ^2.0.7 
   font_awesome_flutter: ^10.1.0
   json_editor_flutter: ^1.0.2
+  focusable_control_builder: ^1.0.0
 
   flutter:
     sdk: flutter
