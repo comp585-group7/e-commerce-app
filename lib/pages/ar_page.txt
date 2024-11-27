@@ -1,0 +1,149 @@
+import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
+import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:camera/camera.dart';
+import 'dart:math';
+
+class ARPage extends StatefulWidget {
+  @override
+  _ARPageState createState() => _ARPageState();
+}
+
+class _ARPageState extends State<ARPage> {
+  late ARSessionManager arSessionManager;
+  late ARObjectManager arObjectManager;
+  late FaceDetector faceDetector;
+  late CameraController _cameraController;
+  bool _isDetecting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+    faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
+      enableContours: true,
+      enableClassification: true,
+    ));
+  }
+
+  Future<void> _initializeCamera() async {
+    final cameras = await availableCameras();
+    final frontCamera = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.front);
+
+    _cameraController = CameraController(
+      frontCamera,
+      ResolutionPreset.medium,
+    );
+
+    await _cameraController.initialize();
+    setState(() {});
+
+    _cameraController.startImageStream((CameraImage cameraImage) {
+      if (!_isDetecting) {
+        _isDetecting = true;
+        _processCameraImage(cameraImage).then((_) => _isDetecting = false);
+      }
+    });
+  }
+
+  Future<void> _processCameraImage(CameraImage cameraImage) async {
+    try {
+      final InputImage inputImage = _convertCameraImageToInputImage(
+          cameraImage, _cameraController.description.sensorOrientation);
+      final faces = await faceDetector.processImage(inputImage);
+
+      if (faces.isNotEmpty) {
+        final face = faces.first;
+        final leftEye = face.landmarks[FaceLandmarkType.leftEye];
+        final rightEye = face.landmarks[FaceLandmarkType.rightEye];
+
+        if (leftEye != null && rightEye != null) {
+          final posX = (leftEye.position.x + rightEye.position.x) / 2;
+          final posY = (leftEye.position.y + rightEye.position.y) / 2;
+          _updateSunglassesPosition(posX, posY);
+        }
+      }
+    } catch (e) {
+      print("Error processing image: $e");
+    }
+  }
+
+  InputImage _convertCameraImageToInputImage(
+      CameraImage cameraImage, int sensorOrientation) {
+    final WriteBuffer allBytes = WriteBuffer();
+    for (Plane plane in cameraImage.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+
+    final bytes = allBytes.done().buffer.asUint8List();
+    final Size imageSize = Size(
+      cameraImage.width.toDouble(),
+      cameraImage.height.toDouble(),
+    );
+
+    final InputImageRotation rotation =
+        InputImageRotationValue.fromRawValue(sensorOrientation) ??
+            InputImageRotation.rotation0deg;
+
+    final InputImageFormat format =
+        InputImageFormatValue.fromRawValue(cameraImage.format.raw) ??
+            InputImageFormat.nv21;
+
+    final InputImageMetadata metadata = InputImageMetadata(
+      size: imageSize,
+      rotation: rotation,
+      format: format,
+      bytesPerRow: cameraImage.planes[0].bytesPerRow,
+    );
+
+    return InputImage.fromBytes(bytes: bytes, metadata: metadata);
+  }
+
+  void _updateSunglassesPosition(double posX, double posY) {
+    // Translate positions to AR world coordinates and update your 3D model
+    print("Sunglasses position: x=$posX, y=$posY");
+  }
+
+  @override
+  void dispose() {
+    _cameraController.dispose();
+    faceDetector.close();
+    super.dispose();
+  }
+
+  void onARViewCreated(
+      ARSessionManager arSessionManager,
+      ARObjectManager arObjectManager,
+      ARAnchorManager arAnchorManager,
+      ARLocationManager arLocationManager) {
+    this.arSessionManager = arSessionManager;
+    this.arObjectManager = arObjectManager;
+
+    arSessionManager.onInitialize(
+        showFeaturePoints: false,
+        showPlanes: false,
+        showWorldOrigin: false,
+        handleTaps: false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          if (_cameraController.value.isInitialized)
+            CameraPreview(_cameraController),
+          ARView(
+            onARViewCreated: onARViewCreated,
+          ),
+        ],
+      ),
+    );
+  }
+}

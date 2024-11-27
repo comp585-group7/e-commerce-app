@@ -1,5 +1,8 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+//import 'package:layout_basics1/pages/ar_page.txt';
+import 'camera_page.dart';
 
 // pages import
 import 'home_page.dart';
@@ -33,8 +36,7 @@ AppBar buildAppBar(BuildContext context) {
           label: 'StyleHive',
           context: context,
           onPressed: () {
-            Navigator.pushReplacement(
-                context,
+            Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => const HomePage()));
           },
         ),
@@ -76,6 +78,41 @@ AppBar buildAppBar(BuildContext context) {
                 );
               },
             ),
+            _buildFocusableIconButton(
+              icon: Icons.camera,
+              context: context,
+              onPressed: () async {
+                try {
+                  // Fetch available cameras
+                  final cameras = await availableCameras();
+
+                  if (cameras.isEmpty) {
+                    // Handle the case where no camera is available
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('No cameras available')),
+                    );
+                    return;
+                  }
+
+                  // Select the first camera (typically the rear camera)
+                  final firstCamera = cameras.first;
+
+                  // Navigate to CameraScreen and pass both the selected camera and the list of cameras
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CameraScreen(camera: firstCamera, cameras: cameras),
+                    ),
+                  );
+                } catch (e) {
+                  // Handle any errors (e.g., permission issues or device errors)
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to access the camera: $e')),
+                  );
+                }
+              },
+            )
           ],
         ),
       ],
