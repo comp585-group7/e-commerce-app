@@ -1,4 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -27,7 +26,6 @@ class ProductDetailsPage extends StatefulWidget {
       this.quantity});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ProductDetailsPageState createState() => _ProductDetailsPageState();
 }
 
@@ -35,10 +33,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   List<dynamic> cartItems = [];
   int quantity = 1; // Default quantity
   String optionMsg = "Add to Cart";
+  PageController _pageController = PageController(); // Controller for image carousel
+  int _currentPage = 0; // Track the currently active page
 
-  // ignore: non_constant_identifier_names
-  String mapping_string =
-      'http://localhost:5000'; // the web mapping string is by default
+  String mapping_string = 'http://localhost:5000'; // the web mapping string is by default
 
   @override
   void initState() {
@@ -52,6 +50,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     _initializePage();
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose(); // Dispose of the controller to prevent memory leaks
+    super.dispose();
+  }
+
   Future<void> _initializePage() async {
     await _fetchCartItems();
 
@@ -63,14 +67,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
     if (cartItem != null) {
       setState(() {
-        quantity = cartItem['quantity'] ??
-            1; // Set quantity to the cart item's quantity or default to 1
+        quantity = cartItem['quantity'] ?? 1;
       });
-      print(
-          "Product with ID ${widget.productId} is already in the cart with quantity $quantity.");
       optionMsg = "Update Cart";
-    } else {
-      print("Product with ID ${widget.productId} is not in the cart.");
     }
   }
 
@@ -96,9 +95,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     } else {
       _showAddToCartDialog(context, "Failed to add item to cart");
     }
-  } // end of _addToCart()
+  }
 
-  // We can fetch the cart, check if the item is already on the cart and checks for its quantity
   Future<void> _fetchCartItems() async {
     try {
       final response = await http.get(Uri.parse('$mapping_string/api/cart'));
@@ -106,15 +104,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         setState(() {
           cartItems = jsonDecode(response.body);
         });
-      } else {
-        print('Failed to load cart items');
       }
     } catch (e) {
       print('Error: $e');
     }
-  } // end of _fetchCartItems()
+  }
 
-  // Checks for the platform if its on Android
   bool isAndroid() {
     if (kIsWeb) {
       return false;
@@ -123,7 +118,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     }
   }
 
-  // Method to show the dialog when "Add to Cart" is pressed
   void _showAddToCartDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -168,115 +162,139 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       appBar: AppBar(title: const Text('Product Details')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Section
-            SizedBox(
-              height: 250,
-              child: PageView.builder(
-                itemCount:
-                    3, // Display the same image multiple times for now, not working currently
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    widget.productImage,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons
-                          .error); // Show an error icon if image fails to load
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Product Info and Description Section
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      widget.productName,
-                      style: const TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '\$${widget.productPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.green,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.productDescription,
-                      style: const TextStyle(fontSize: 16.0),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const Divider(height: 40, thickness: 1.5),
-
-            // Quantity Selector Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Quantity:',
-                  style: TextStyle(fontSize: 18.0),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: () {
-                        if (quantity > 1) {
-                          setState(() {
-                            quantity--;
-                          });
-                        }
-                      },
-                    ),
-                    Text(
-                      quantity.toString(),
-                      style: const TextStyle(fontSize: 18.0),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
+            // Left Column: Image Carousel
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 300,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: (index) {
                         setState(() {
-                          quantity++;
+                          _currentPage = index;
                         });
                       },
+                      itemCount: 3, // Replace with the actual number of images
+                      itemBuilder: (context, index) {
+                        return Image.network(
+                          widget.productImage, // Replace with list of images
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.error, size: 100);
+                          },
+                        );
+                      },
                     ),
-                  ],
-                ),
-              ],
-            ),
-
-            const Spacer(),
-
-            // Add to Cart Button
-            ElevatedButton(
-              onPressed: () => _addToCart(context, quantity),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      3, // Replace with the actual number of images
+                      (index) => Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                        width: 8.0,
+                        height: 8.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _currentPage == index ? Colors.black : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: Text(
-                optionMsg,
-                style: TextStyle(fontSize: 18.0, color: Colors.white),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.productName,
+                    style: const TextStyle(
+                      fontSize: 28.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '\$${widget.productPrice.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 22.0,
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.productDescription,
+                    style: const TextStyle(fontSize: 16.0, height: 1.5),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Quantity:',
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: () {
+                              if (quantity > 1) {
+                                setState(() {
+                                  quantity--;
+                                });
+                              }
+                            },
+                          ),
+                          Text(
+                            quantity.toString(),
+                            style: const TextStyle(fontSize: 18.0),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              setState(() {
+                                quantity++;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _addToCart(context, quantity),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 20.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          elevation: 5,
+                        ),
+                        child: Text(
+                          optionMsg,
+                          style: const TextStyle(fontSize: 18.0, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
