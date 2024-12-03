@@ -19,39 +19,15 @@ AppBar buildAppBar(BuildContext context) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildFocusableButton(
-          label: 'Shop',
-          context: context,
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ShopPage(appBarBuilder: buildAppBar)),
-            );
-          },
-        ),
-        _buildFocusableButton(
           label: 'StyleHive',
           context: context,
           onPressed: () {
-            Navigator.pushReplacement(
-                context,
+            Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => const HomePage()));
           },
         ),
         Row(
           children: [
-            _buildFocusableButton(
-              label: 'Profile',
-              context: context,
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ProfilePage(
-                          appBarBuilder: buildAppBar, username: "admin")),
-                );
-              },
-            ),
             _buildFocusableIconButton(
               icon: Icons.search,
               context: context,
@@ -73,6 +49,21 @@ AppBar buildAppBar(BuildContext context) {
                   MaterialPageRoute(
                       builder: (context) =>
                           const CartPage(appBarBuilder: buildAppBar)),
+                );
+              },
+            ),
+            _buildFocusableIconButton(
+              icon: Icons.person, // or another profile-related icon
+              context: context,
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(
+                      appBarBuilder: buildAppBar,
+                      username: "admin",
+                    ),
+                  ),
                 );
               },
             ),

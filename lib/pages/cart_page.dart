@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:layout_basics1/old/bee_main.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:json_editor_flutter/json_editor_flutter.dart';
@@ -18,6 +17,7 @@ import 'product_details_page.dart';
 import 'profile_page.dart';
 import 'shop_page.dart';
 import 'checkout.dart';
+import 'app_bar.dart'; // Import buildAppBar function
 
 class CartPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
@@ -37,14 +37,14 @@ class _CartPageState extends State<CartPage> {
   void initState() {
     super.initState();
 
-    if(isAndroid()) {
+    if (isAndroid()) {
       mapping_string = 'http://10.0.2.2:5000';
     }
 
     _fetchCartItems();
   }
 
-  // Checks for the platform if its on Android
+  // Checks if the platform is Android
   bool isAndroid() {
     if (kIsWeb) {
       return false;
@@ -251,11 +251,33 @@ class _CartPageState extends State<CartPage> {
     return Scaffold(
       appBar: widget.appBarBuilder(context),
       body: cartItems.isEmpty
-          ? Column(
-              children: [
-                _buildSectionHeader("Cart"),
-                const Center(child: Text("Your cart is empty.")),
-              ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildSectionHeader("Cart"),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Your cart is empty.",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Navigate to ShopPage
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ShopPage(
+                            appBarBuilder: buildAppBar,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Browse Products'),
+                  ),
+                ],
+              ),
             )
           : Column(
               children: [
@@ -280,7 +302,7 @@ class _CartPageState extends State<CartPage> {
                                 productImage: item['image'],
                                 productPrice: item['price'],
                                 productId: int.parse(item['id']),
-                                quantity: item['quantity']
+                                quantity: item['quantity'],
                               ),
                             ),
                           );
@@ -299,6 +321,7 @@ class _CartPageState extends State<CartPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    // Navigate to CheckoutPage
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => CheckoutPage()),
@@ -312,3 +335,4 @@ class _CartPageState extends State<CartPage> {
     );
   }
 }
+// End of CartPage class

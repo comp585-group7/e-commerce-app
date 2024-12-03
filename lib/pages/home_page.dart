@@ -9,7 +9,6 @@ import 'product_details_page.dart'; // Import ProductDetailsPage
 import 'app_bar.dart'; // Import buildAppBar function
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
@@ -25,9 +24,10 @@ class _HomePageState extends State<HomePage> {
 
   List<dynamic> products = [];
   List<dynamic> categories = [];
+
+  // The web mapping string is set by default
   // ignore: non_constant_identifier_names
-  String mapping_string =
-      'http://localhost:5000'; // the web mapping string is by default
+  String mapping_string = 'http://localhost:5000';
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     _loadCatalogData();
   }
 
-  // Checks for the platform if its on Android
+  // Checks if the platform is Android
   bool isAndroid() {
     if (kIsWeb) {
       return false;
@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Load product data from JSON
+  // Load product data from the API
   Future<void> _loadProductData() async {
     final response =
         await http.get(Uri.parse('$mapping_string/api/products/featured'));
@@ -65,9 +65,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Load category data from JSON
+  // Load category data from the API
   Future<void> _loadCatalogData() async {
-    // Catalog == Category
     try {
       // Perform the GET request to fetch catalog data from the API
       final response =
@@ -77,8 +76,7 @@ class _HomePageState extends State<HomePage> {
         // Parse the JSON response
         final data = json.decode(response.body);
         setState(() {
-          categories = data[
-              'categories']; // Assuming the API response has a 'categories' key
+          categories = data['categories'];
         });
       } else {
         // Handle non-200 status codes
@@ -94,7 +92,6 @@ class _HomePageState extends State<HomePage> {
           categories = fallbackData['categories'];
         });
       } catch (fallbackError) {
-        // Log or rethrow if fallback also fails
         print('Error loading fallback catalog data: $fallbackError');
         throw Exception('Failed to load catalog data from API and fallback.');
       }
@@ -121,12 +118,14 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ShopPage(
-                      appBarBuilder: buildAppBar,
-                      category: category,
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) => ShopPage(
+              appBarBuilder: buildAppBar,
+              category: category,
+            ),
+          ),
+        );
       },
       child: Card(
         color: Colors.white,
@@ -143,15 +142,17 @@ class _HomePageState extends State<HomePage> {
                 width: 30,
                 height: 30,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons
-                      .error); // Show an error icon in case image fails to load
+                  return const Icon(
+                      Icons.error); // Show an error icon if image fails to load
                 },
               ),
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {},
-                child: Text(category,
-                    style: TextStyle(fontSize: 16.0, color: Colors.black)),
+                child: Text(
+                  category,
+                  style: const TextStyle(fontSize: 16.0, color: Colors.black),
+                ),
               ),
             ],
           ),
@@ -176,29 +177,82 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Updated Container with Stack to overlay text on image
             Container(
               height: 250.0,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                      'https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png'),
-                  fit: BoxFit.cover,
-                ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Background image
+                  Image.network(
+                    'https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.error);
+                    },
+                  ),
+                  // Centered texts over the image
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Black Friday Sale',
+                          style: TextStyle(
+                            fontSize: 28.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10.0,
+                                color: Colors.black87,
+                                offset: Offset(2.0, 2.0),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Up to 50% off on selected items',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.normal,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10.0,
+                                color: Colors.black54,
+                                offset: Offset(1.0, 1.0),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
+            // Centered "Shop Latest Apparel" text
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Shop Latest Apparel',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+              child: Center(
+                child: Text(
+                  'Shop Latest Apparel',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
             const SizedBox(height: 10),
+            // Featured products carousel with borders
             Container(
               height: cardHeight,
               child: Stack(
@@ -234,6 +288,12 @@ class _HomePageState extends State<HomePage> {
                                     horizontal: 10.0),
                                 child: Container(
                                   width: cardWidth,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: Colors.grey, width: 1.0),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
                                   child: Column(
                                     children: [
                                       Expanded(
@@ -246,8 +306,7 @@ class _HomePageState extends State<HomePage> {
                                             width: double.infinity,
                                             errorBuilder:
                                                 (context, error, stackTrace) {
-                                              return const Icon(Icons
-                                                  .error); // Show an error icon in case image fails to load
+                                              return const Icon(Icons.error);
                                             },
                                           ),
                                         ),
@@ -285,6 +344,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 50),
                     ],
                   ),
+                  // Left scroll button
                   Positioned(
                     left: 0,
                     top: cardHeight / 2 - 25,
@@ -295,6 +355,7 @@ class _HomePageState extends State<HomePage> {
                       child: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
                   ),
+                  // Right scroll button
                   Positioned(
                     right: 0,
                     top: cardHeight / 2 - 25,
@@ -310,18 +371,23 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Centered "Shop by Category" text
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Shop by Category',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+              child: Center(
+                child: Text(
+                  'Shop by Category',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
             const SizedBox(height: 10),
+            // Categories grid
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: GridView.count(
@@ -329,7 +395,6 @@ class _HomePageState extends State<HomePage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 childAspectRatio: isSmallScreen ? 2.5 : 6.5,
-                //children: List.generate(categories.length - 12, (index) {
                 children: List.generate(4, (index) {
                   var category = categories[index];
                   return _buildCategoryCard(
@@ -338,6 +403,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 40),
+            // Footer section
             Container(
               color: Colors.grey[900],
               width: double.infinity,
@@ -355,7 +421,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'StyleHiveeeeeee is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
+                    'StyleHive is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 16.0,
@@ -401,4 +467,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-// End of Main Landing Page class
+// End of HomePage class
