@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:focusable_control_builder/focusable_control_builder.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
+import 'product_details_page.dart';
+import 'product_model.dart';
+import 'app_bar.dart';
 
-import 'product_details_page.dart'; // Import ProductDetailsPage
-
-/// Shop Page
-/// This page would show all the items being sold
-/// can we add a way to use focusable_control_builder.dart so that the shop cards are higlighted with black when hovered on
 class ShopPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
   final String? category;
 
-  const ShopPage({super.key, required this.appBarBuilder, this.category});
+  const ShopPage({Key? key, required this.appBarBuilder, this.category})
+      : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _ShopPageState createState() => _ShopPageState();
 }
 
@@ -26,22 +20,14 @@ class _ShopPageState extends State<ShopPage> {
   final ScrollController _scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
 
-  List<dynamic> products = [];
-  List<dynamic> searchResults = [];
-  List<dynamic> categories = [];
-  // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000'; // default is web
+  List<Product> products = [];
+  List<Product> searchResults = [];
+  List<Category> categories = [];
 
   @override
   void initState() {
     super.initState();
 
-    // Checks if the device is android or not
-    if (isAndroid()) {
-      mapping_string = 'http://10.0.2.2:5000';
-    }
-
-    // Load products and handle category filtering asynchronously
     _initializePage();
 
     // Set up the search controller listener
@@ -51,65 +37,55 @@ class _ShopPageState extends State<ShopPage> {
   }
 
   Future<void> _initializePage() async {
-    await loadProductData(); // Wait for products to load
+    await _loadProductData();
+    await _loadCatalogData();
 
-    _loadCatalogData();
-
-    // Check if the category is provided and apply the filter
+    // Apply category filter if provided
     if (widget.category != null && widget.category!.isNotEmpty) {
       String searchTerm = widget.category!;
-
-      // Ensure products are loaded before applying the filter
       if (products.isNotEmpty) {
         setState(() {
-          searchController.text = searchTerm; // Set the search text
-          filterSearchResults(searchTerm); // Run the filter
+          searchController.text = searchTerm;
+          filterSearchResults(searchTerm);
         });
       }
     }
   }
 
-  // Checks for the platform if its on Android
-  bool isAndroid() {
-    if (kIsWeb) {
-      return false;
-    } else {
-      return Platform.isAndroid;
+  // Load products from Firestore
+  Future<void> _loadProductData() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('products').get();
+
+      List<Product> productList = querySnapshot.docs
+          .map((doc) => Product.fromFirestore(doc))
+          .toList();
+
+      setState(() {
+        products = productList;
+        searchResults = productList;
+      });
+    } catch (e) {
+      print('Error loading products: $e');
     }
   }
 
-  // Load category data from JSON
+  // Load categories from Firestore
   Future<void> _loadCatalogData() async {
     try {
-      // Perform the GET request to fetch catalog data from the API
-      final response =
-          await http.get(Uri.parse('$mapping_string/api/products/catalog'));
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('categories').get();
 
-      if (response.statusCode == 200) {
-        // Parse the JSON response
-        final data = json.decode(response.body);
-        setState(() {
-          categories = data[
-              'categories']; // Assuming the API response has a 'categories' key
-        });
-      } else {
-        // Handle non-200 status codes
-        throw Exception('Failed to load catalog data: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Fallback: Load data from a local JSON file if API fails
-      try {
-        final String fallbackResponse =
-            await rootBundle.loadString('assets/data-ctlg.json');
-        final fallbackData = json.decode(fallbackResponse);
-        setState(() {
-          categories = fallbackData['categories'];
-        });
-      } catch (fallbackError) {
-        // Log or rethrow if fallback also fails
-        print('Error loading fallback catalog data: $fallbackError');
-        throw Exception('Failed to load catalog data from API and fallback.');
-      }
+      List<Category> categoryList = querySnapshot.docs
+          .map((doc) => Category.fromFirestore(doc))
+          .toList();
+
+      setState(() {
+        categories = categoryList;
+      });
+    } catch (e) {
+      print('Error loading categories: $e');
     }
   }
 
@@ -129,29 +105,11 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  Future<void> loadProductData() async {
-    try {
-      final response =
-          await http.get(Uri.parse('$mapping_string/api/products'));
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        setState(() {
-          products = jsonData['products'];
-          searchResults = products;
-        });
-      } else {
-        throw Exception('Failed to load products');
-      }
-    } catch (e) {
-      print('Error loading products: $e');
-    }
-  }
-
   void filterSearchResults(String query) {
-    List<dynamic> results = [];
+    List<Product> results = [];
     if (query.isNotEmpty) {
       results = products.where((product) {
-        return product['name'].toLowerCase().contains(query.toLowerCase());
+        return product.name.toLowerCase().contains(query.toLowerCase());
       }).toList();
     } else {
       results = products;
@@ -161,12 +119,12 @@ class _ShopPageState extends State<ShopPage> {
     });
   }
 
-  Widget _buildCategoryCard(String category, String imageAsset) {
+  Widget _buildCategoryCard(Category category) {
     return GestureDetector(
       onTap: () {
-        // filter products based on category
-        filterSearchResults(category);
-        searchController.text = category;
+        // Filter products based on category
+        filterSearchResults(category.name);
+        searchController.text = category.name;
       },
       child: Card(
         elevation: 3,
@@ -178,24 +136,24 @@ class _ShopPageState extends State<ShopPage> {
             children: [
               const SizedBox(width: 15),
               Image.network(
-                imageAsset,
+                category.image,
                 width: 30,
                 height: 30,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons
-                      .error); // Show an error icon in case image fails to load
+                  return const Icon(Icons.error);
                 },
               ),
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {
-                  // filter products based on category
-                  filterSearchResults(category);
-                  searchController.text = category;
+                  // Filter products based on category
+                  filterSearchResults(category.name);
+                  searchController.text = category.name;
                 },
-                child: Text(category,
-                    style:
-                        const TextStyle(color: Colors.black, fontSize: 16.0)),
+                child: Text(
+                  category.name,
+                  style: const TextStyle(color: Colors.black, fontSize: 16.0),
+                ),
               ),
             ],
           ),
@@ -204,9 +162,8 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  Widget _buildShopCard(String productName, String imageAsset,
-      double productPrice, String pdescription, int productId) {
-    String priceRecord = "\$$productPrice";
+  Widget _buildShopCard(Product product) {
+    String priceRecord = "\$${product.price.toStringAsFixed(2)}";
 
     return FocusableControlBuilder(
       builder: (context, state) {
@@ -218,11 +175,7 @@ class _ShopPageState extends State<ShopPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => ProductDetailsPage(
-                  productName: productName,
-                  productDescription: pdescription,
-                  productImage: imageAsset,
-                  productPrice: productPrice,
-                  productId: productId,
+                  product: product,
                 ),
               ),
             );
@@ -234,7 +187,7 @@ class _ShopPageState extends State<ShopPage> {
             child: Card(
               elevation: 5,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16.0),
                   bottomRight: Radius.circular(16.0),
                 ),
@@ -250,23 +203,21 @@ class _ShopPageState extends State<ShopPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                          8.0), // Rounded corners for image
+                      borderRadius:
+                          BorderRadius.circular(8.0), // Rounded corners for image
                       child: Image.network(
-                        imageAsset,
+                        product.image,
                         width: 160,
                         height: 160,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error,
-                              size:
-                                  40); // Show error icon if image fails to load
+                          return const Icon(Icons.error, size: 40);
                         },
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      productName,
+                      product.name,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -316,6 +267,7 @@ class _ShopPageState extends State<ShopPage> {
                     icon: const Icon(Icons.clear),
                     onPressed: () {
                       searchController.clear();
+                      filterSearchResults('');
                     },
                   ),
                   border: OutlineInputBorder(
@@ -340,8 +292,7 @@ class _ShopPageState extends State<ShopPage> {
                       children: categories.map((category) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: _buildCategoryCard(
-                              category['name'], category['image']),
+                          child: _buildCategoryCard(category),
                         );
                       }).toList(),
                     ),
@@ -368,13 +319,7 @@ class _ShopPageState extends State<ShopPage> {
                           isSmallScreen ? 2 / 2.8 : 2 / 2.5, // Adjust the ratio
                     ),
                     itemBuilder: (context, index) {
-                      return _buildShopCard(
-                        searchResults[index]['name'],
-                        searchResults[index]['image'],
-                        searchResults[index]['price'],
-                        searchResults[index]['description'],
-                        searchResults[index]['id'],
-                      );
+                      return _buildShopCard(searchResults[index]);
                     },
                   ),
           ],

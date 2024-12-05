@@ -1,127 +1,131 @@
-// ignore_for_file: unused_import
-
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:json_editor_flutter/json_editor_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
-
-// import pages
-import 'home_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'product_details_page.dart';
-import 'profile_page.dart';
+import 'product_model.dart';
 import 'shop_page.dart';
+import 'app_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
 import 'checkout.dart';
-import 'app_bar.dart'; // Import buildAppBar function
 
 class CartPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
 
-  const CartPage({super.key, required this.appBarBuilder});
+  const CartPage({Key? key, required this.appBarBuilder}) : super(key: key);
 
   @override
   _CartPageState createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
-  List<dynamic> cartItems = [];
-  // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000';
+  List<Product> cartItems = [];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late User user;
 
   @override
   void initState() {
     super.initState();
 
-    if (isAndroid()) {
-      mapping_string = 'http://10.0.2.2:5000';
-    }
+    user = _auth.currentUser!;
 
-    _fetchCartItems();
-  }
-
-  // Checks if the platform is Android
-  bool isAndroid() {
-    if (kIsWeb) {
-      return false;
+    if (user == null) {
+      // Redirect to LoginPage
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      });
     } else {
-      return Platform.isAndroid;
+      _fetchCartItems();
     }
   }
 
   Future<void> _fetchCartItems() async {
     try {
-      final response = await http.get(Uri.parse('$mapping_string/api/cart'));
-      if (response.statusCode == 200) {
-        setState(() {
-          cartItems = jsonDecode(response.body);
-        });
-      } else {
-        print('Failed to load cart items');
-      }
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('cart')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      List<Product> items = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Product(
+          id: data['productId'] ?? 0,
+          name: data['name'] ?? '',
+          description: data['description'] ?? '',
+          image: data['image'] ?? '',
+          price: (data['price'] as num?)?.toDouble() ?? 0.0,
+          quantity: data['quantity'] ?? 1,
+        );
+      }).toList();
+
+      setState(() {
+        cartItems = items;
+      });
     } catch (e) {
-      print('Error: $e');
+      print('Error fetching cart items: $e');
     }
   }
 
-  void _removeFromCart(String itemId) async {
+  Future<void> _removeFromCart(int productId) async {
     try {
-      final response =
-          await http.delete(Uri.parse('$mapping_string/api/cart/$itemId'));
-      if (response.statusCode == 200) {
-        setState(() {
-          cartItems.removeWhere((item) => item['id'].toString() == itemId);
-        });
-      } else {
-        print('Failed to remove item: ${response.body}');
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('cart')
+          .where('userId', isEqualTo: user.uid)
+          .where('productId', isEqualTo: productId)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
       }
+
+      setState(() {
+        cartItems.removeWhere((item) => item.id == productId);
+      });
     } catch (e) {
-      print('Error: $e');
+      print('Error removing item from cart: $e');
     }
   }
 
   double _calculateTotalPrice() {
     double total = 0;
     for (var item in cartItems) {
-      total += item['price'] * item['quantity'];
+      total += item.price * item.quantity;
     }
     return total;
   }
 
-  Future<void> _updateCartQuantity(String id, int newQuantity) async {
+  Future<void> _updateCartQuantity(int productId, int newQuantity) async {
     if (newQuantity < 1) {
-      _removeFromCart(id);
+      _removeFromCart(productId);
       return;
     }
 
-    final updatedItem = {
-      'id': id,
-      'quantity': newQuantity,
-    };
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('cart')
+          .where('userId', isEqualTo: user.uid)
+          .where('productId', isEqualTo: productId)
+          .get();
 
-    final response = await http.post(
-      Uri.parse('$mapping_string/api/cart'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(updatedItem),
-    );
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.update({'quantity': newQuantity});
+      }
 
-    if (response.statusCode == 201) {
       setState(() {
-        final index = cartItems.indexWhere((item) => item['id'] == id);
+        final index = cartItems.indexWhere((item) => item.id == productId);
         if (index != -1) {
-          cartItems[index]['quantity'] = newQuantity;
+          cartItems[index].quantity = newQuantity;
         }
       });
-    } else {
-      print('Failed to update item in cart');
+    } catch (e) {
+      print('Error updating cart quantity: $e');
     }
   }
 
-  // Helper method to build section headers with a centered, rounded square, black background, and white font
+  // Helper methods...
+
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -146,11 +150,10 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  // Helper method to build a cart item widget
   Widget _buildCartItem({
-    required Map<String, dynamic> item,
-    required Function(String) onRemove,
-    required Function(String, int) onUpdateQuantity,
+    required Product item,
+    required Function(int) onRemove,
+    required Function(int, int) onUpdateQuantity,
     Function()? onTap, // Optional callback for item click
   }) {
     return GestureDetector(
@@ -169,7 +172,7 @@ class _CartPageState extends State<CartPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8), // Rounded image corners
               child: Image.network(
-                item['image'], // Uses 'image' URL from JSON
+                item.image,
                 width: 80.0,
                 height: 80.0,
                 fit: BoxFit.cover,
@@ -187,7 +190,7 @@ class _CartPageState extends State<CartPage> {
                 children: [
                   // Product Name
                   Text(
-                    item['name'],
+                    item.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16.0,
@@ -206,22 +209,22 @@ class _CartPageState extends State<CartPage> {
                         constraints: const BoxConstraints(maxHeight: 24),
                         padding: EdgeInsets.zero, // Compact buttons
                         onPressed: () {
-                          onUpdateQuantity(item['id'], item['quantity'] - 1);
+                          onUpdateQuantity(item.id, item.quantity - 1);
                         },
                       ),
-                      Text('${item['quantity']}'),
+                      Text('${item.quantity}'),
                       IconButton(
                         icon: const Icon(Icons.add),
                         constraints: const BoxConstraints(maxHeight: 24),
                         padding: EdgeInsets.zero,
                         onPressed: () {
-                          onUpdateQuantity(item['id'], item['quantity'] + 1);
+                          onUpdateQuantity(item.id, item.quantity + 1);
                         },
                       ),
                       const SizedBox(width: 8), // Spacing before price
                       Flexible(
                         child: Text(
-                          'Price: \$${item['price'].toStringAsFixed(2)}',
+                          'Price: \$${item.price.toStringAsFixed(2)}',
                           style: const TextStyle(fontSize: 14.0),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -237,7 +240,7 @@ class _CartPageState extends State<CartPage> {
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
-                onRemove(item['id'].toString());
+                onRemove(item.id);
               },
             ),
           ],
@@ -292,17 +295,11 @@ class _CartPageState extends State<CartPage> {
                         onRemove: _removeFromCart,
                         onUpdateQuantity: _updateCartQuantity,
                         onTap: () {
-                          print('Tapped on item: ${item['name']}');
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProductDetailsPage(
-                                productName: item['name'],
-                                productDescription: item['desc'],
-                                productImage: item['image'],
-                                productPrice: item['price'],
-                                productId: int.parse(item['id']),
-                                quantity: item['quantity'],
+                                product: item,
                               ),
                             ),
                           );
@@ -324,7 +321,8 @@ class _CartPageState extends State<CartPage> {
                     // Navigate to CheckoutPage
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CheckoutPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const CheckoutPage()),
                     );
                   },
                   child: const Text('Checkout'),
@@ -335,4 +333,3 @@ class _CartPageState extends State<CartPage> {
     );
   }
 }
-// End of CartPage class

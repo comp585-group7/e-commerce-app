@@ -1,15 +1,12 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:layout_basics1/pages/shop_page.dart';
-import 'dart:convert';
-import 'dart:io' show Platform;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'product_details_page.dart'; // Import ProductDetailsPage
 import 'app_bar.dart'; // Import buildAppBar function
+import 'product_model.dart'; // Import Product and Category classes
+import 'shop_page.dart'; // Import ShopPage
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,79 +19,51 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
 
-  List<dynamic> products = [];
-  List<dynamic> categories = [];
-
-  // The web mapping string is set by default
-  // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000';
+  List<Product> products = [];
+  List<Category> categories = [];
 
   @override
   void initState() {
     super.initState();
-
-    if (isAndroid()) {
-      mapping_string = 'http://10.0.2.2:5000';
-    }
-
     _loadProductData();
     _loadCatalogData();
   }
 
-  // Checks if the platform is Android
-  bool isAndroid() {
-    if (kIsWeb) {
-      return false;
-    } else {
-      return Platform.isAndroid;
-    }
-  }
-
-  // Load product data from the API
+  // Load product data from Firestore
   Future<void> _loadProductData() async {
-    final response =
-        await http.get(Uri.parse('$mapping_string/api/products/featured'));
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .get();
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      List<Product> productList = querySnapshot.docs
+          .map((doc) => Product.fromFirestore(doc))
+          .toList();
+
       setState(() {
-        products = data['products'];
+        products = productList;
       });
-    } else {
-      throw Exception('Failed to load products');
+    } catch (e) {
+      print('Error loading products: $e');
     }
   }
 
-  // Load category data from the API
+  // Load category data from Firestore
   Future<void> _loadCatalogData() async {
     try {
-      // Perform the GET request to fetch catalog data from the API
-      final response =
-          await http.get(Uri.parse('$mapping_string/api/products/catalog'));
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('categories')
+          .get();
 
-      if (response.statusCode == 200) {
-        // Parse the JSON response
-        final data = json.decode(response.body);
-        setState(() {
-          categories = data['categories'];
-        });
-      } else {
-        // Handle non-200 status codes
-        throw Exception('Failed to load catalog data: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Fallback: Load data from a local JSON file if API fails
-      try {
-        final String fallbackResponse =
-            await rootBundle.loadString('assets/data-ctlg.json');
-        final fallbackData = json.decode(fallbackResponse);
-        setState(() {
-          categories = fallbackData['categories'];
-        });
-      } catch (fallbackError) {
-        print('Error loading fallback catalog data: $fallbackError');
-        throw Exception('Failed to load catalog data from API and fallback.');
-      }
+      List<Category> categoryList = querySnapshot.docs
+          .map((doc) => Category.fromFirestore(doc))
+          .toList();
+
+      setState(() {
+        categories = categoryList;
+      });
+    } catch (e) {
+      print('Error loading categories: $e');
     }
   }
 
@@ -114,15 +83,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildCategoryCard(String category, String imageAsset) {
+  Widget _buildCategoryCard(Category category) {
     return GestureDetector(
       onTap: () {
+        // Navigate to ShopPage filtered by category
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ShopPage(
               appBarBuilder: buildAppBar,
-              category: category,
+              category: category.name,
             ),
           ),
         );
@@ -138,19 +108,18 @@ class _HomePageState extends State<HomePage> {
             children: [
               const SizedBox(width: 15),
               Image.network(
-                imageAsset,
+                category.image,
                 width: 30,
                 height: 30,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                      Icons.error); // Show an error icon if image fails to load
+                  return const Icon(Icons.error);
                 },
               ),
               const SizedBox(width: 10),
               TextButton(
                 onPressed: () {},
                 child: Text(
-                  category,
+                  category.name,
                   style: const TextStyle(fontSize: 16.0, color: Colors.black),
                 ),
               ),
@@ -160,6 +129,74 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Widget _buildProductCard(Product product, double cardWidth) {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to ProductDetailsPage
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailsPage(
+              product: product,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Container(
+          width: cardWidth,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey, width: 1.0),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    product.image,
+                    fit: BoxFit.contain,
+                    width: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.error);
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Build method and other code...
 
   @override
   Widget build(BuildContext context) {
@@ -177,8 +214,9 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ... Rest of your UI code
             // Updated Container with Stack to overlay text on image
-            Container(
+            SizedBox(
               height: 250.0,
               child: Stack(
                 fit: StackFit.expand,
@@ -212,7 +250,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         Text(
                           'Up to 50% off on selected items',
                           style: TextStyle(
@@ -252,8 +290,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 10),
-            // Featured products carousel with borders
-            Container(
+            // Featured products carousel
+            SizedBox(
               height: cardHeight,
               child: Stack(
                 children: [
@@ -267,77 +305,7 @@ class _HomePageState extends State<HomePage> {
                           itemCount: products.length,
                           itemBuilder: (context, index) {
                             var product = products[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProductDetailsPage(
-                                      productName: product['name'],
-                                      productDescription:
-                                          product['description'],
-                                      productImage: product['image'],
-                                      productPrice: product['price'],
-                                      productId: product['id'],
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: Container(
-                                  width: cardWidth,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                        color: Colors.grey, width: 1.0),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: Image.network(
-                                            product['image'],
-                                            fit: BoxFit.contain,
-                                            width: double.infinity,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const Icon(Icons.error);
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              product['name'],
-                                              style: const TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              '\$${product['price']}',
-                                              style: const TextStyle(
-                                                fontSize: 14.0,
-                                                color: Colors.green,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
+                            return _buildProductCard(product, cardWidth);
                           },
                         ),
                       ),
@@ -363,8 +331,7 @@ class _HomePageState extends State<HomePage> {
                       backgroundColor: Colors.black,
                       mini: true,
                       onPressed: _scrollRight,
-                      child:
-                          const Icon(Icons.arrow_forward, color: Colors.white),
+                      child: const Icon(Icons.arrow_forward, color: Colors.white),
                     ),
                   ),
                 ],
@@ -395,11 +362,9 @@ class _HomePageState extends State<HomePage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 childAspectRatio: isSmallScreen ? 2.5 : 6.5,
-                children: List.generate(4, (index) {
-                  var category = categories[index];
-                  return _buildCategoryCard(
-                      category['name'], category['image']);
-                }),
+                children: categories.map((category) {
+                  return _buildCategoryCard(category);
+                }).toList(),
               ),
             ),
             const SizedBox(height: 40),
@@ -467,4 +432,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-// End of HomePage class

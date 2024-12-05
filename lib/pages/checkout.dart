@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Placeholder for CheckoutPage, implement as needed
 class CheckoutPage extends StatelessWidget {
   const CheckoutPage({super.key});

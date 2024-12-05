@@ -1,9 +1,13 @@
-// ignore: unused_import
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart'; // basic flutter package
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; // Import the generated file
 import 'pages/home_page.dart'; // Import HomePage
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const StyleHiveApp());
 }
 
@@ -13,15 +17,13 @@ class StyleHiveApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'StyleHive',
       theme: ThemeData(
         primaryColor: Colors.black,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const HomePage(), // Use HomePage from home_page.dart
+      debugShowCheckedModeBanner: false,
+      home: const HomePage(), // Show HomePage regardless of authentication status
     );
   }
 }
-
-/// End of document
