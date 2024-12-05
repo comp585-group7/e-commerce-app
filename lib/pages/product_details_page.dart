@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'product_model.dart'; // Import the Product model
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'cart_page.dart'; // If you have a CartPage
+import 'cart_page.dart'; // Import CartPage
 import 'app_bar.dart'; // Import your buildAppBar function
 import 'shop_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart'; // Import LoginPage
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -21,21 +22,31 @@ class ProductDetailsPage extends StatefulWidget {
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int quantity = 1;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  late User user;
+  User? user; // Make user nullable
 
   @override
   void initState() {
     super.initState();
-    user = _auth.currentUser!;
+    user = _auth.currentUser; // Assign current user
   }
 
   // Method to add the product to the cart
   Future<void> _addToCart(BuildContext context) async {
+    if (user == null) {
+      // User is not logged in
+      // Redirect to LoginPage
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+      return;
+    }
+
     try {
       final cartCollection = FirebaseFirestore.instance.collection('cart');
 
       await cartCollection.add({
-        'userId': user.uid,
+        'userId': user!.uid,
         'productId': widget.product.id,
         'name': widget.product.name,
         'price': widget.product.price,
@@ -102,6 +113,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
+        // Rest of your UI code remains the same
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

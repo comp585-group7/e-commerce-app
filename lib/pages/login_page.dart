@@ -108,6 +108,16 @@ class _LoginPageState extends State<LoginPage> {
               },
               child: const Text('Create an Account'),
             ),
+            // Back to HomePage button
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
+              },
+              child: const Text('Back to Home'),
+            ),
           ],
         ),
       ),

@@ -20,13 +20,13 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   List<Product> cartItems = [];
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  late User user;
+  User? user; // Make user nullable
 
   @override
   void initState() {
     super.initState();
 
-    user = _auth.currentUser!;
+    user = _auth.currentUser;
 
     if (user == null) {
       // Redirect to LoginPage
@@ -45,7 +45,7 @@ class _CartPageState extends State<CartPage> {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('cart')
-          .where('userId', isEqualTo: user.uid)
+          .where('userId', isEqualTo: user!.uid)
           .get();
 
       List<Product> items = querySnapshot.docs.map((doc) {
@@ -72,7 +72,7 @@ class _CartPageState extends State<CartPage> {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('cart')
-          .where('userId', isEqualTo: user.uid)
+          .where('userId', isEqualTo: user!.uid)
           .where('productId', isEqualTo: productId)
           .get();
 
@@ -105,7 +105,7 @@ class _CartPageState extends State<CartPage> {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('cart')
-          .where('userId', isEqualTo: user.uid)
+          .where('userId', isEqualTo: user!.uid)
           .where('productId', isEqualTo: productId)
           .get();
 

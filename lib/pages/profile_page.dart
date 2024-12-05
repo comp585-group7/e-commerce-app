@@ -17,17 +17,14 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  late User user;
+  User? user; // Make user nullable
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    user = _auth.currentUser!;
-  }
+    user = _auth.currentUser;
 
-  @override
-  Widget build(BuildContext context) {
     if (user == null) {
       // User is not logged in, redirect to LoginPage
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -36,16 +33,25 @@ class _ProfilePageState extends State<ProfilePage> {
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       });
-      return const SizedBox.shrink(); // Return an empty widget
+      return;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (user == null) {
+      // Return an empty widget while redirecting
+      return const SizedBox.shrink();
     }
 
-    String email = user.email ?? "No Email";
+    String email = user!.email ?? "No Email";
 
     return Scaffold(
       appBar: widget.appBarBuilder(context),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
+              // Your existing profile UI code
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +160,7 @@ class _ProfilePageState extends State<ProfilePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextFormField(
-                  initialValue: user.email,
+                  initialValue: user!.email,
                   decoration: const InputDecoration(labelText: 'New Email'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -217,16 +223,16 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       // Re-authenticate the user
       AuthCredential credential = EmailAuthProvider.credential(
-        email: user.email!,
+        email: user!.email!,
         password: password,
       );
 
-      await user.reauthenticateWithCredential(credential);
+      await user!.reauthenticateWithCredential(credential);
 
       // Update the email
-      await user.updateEmail(newEmail);
-      await user.reload();
-      user = _auth.currentUser!;
+      await user!.updateEmail(newEmail);
+      await user!.reload();
+      user = _auth.currentUser;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email updated successfully')),
@@ -339,16 +345,16 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       // Re-authenticate the user
       AuthCredential credential = EmailAuthProvider.credential(
-        email: user.email!,
+        email: user!.email!,
         password: currentPassword,
       );
 
-      await user.reauthenticateWithCredential(credential);
+      await user!.reauthenticateWithCredential(credential);
 
       // Update the password
-      await user.updatePassword(newPassword);
-      await user.reload();
-      user = _auth.currentUser!;
+      await user!.updatePassword(newPassword);
+      await user!.reload();
+      user = _auth.currentUser;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password changed successfully')),
