@@ -3,9 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-// Only available on web. If building for mobile, this import will be inert.
-import 'dart:html' as html;
+import 'package:url_launcher/url_launcher.dart'; // Added
 
 const String backendUrl = 'https://ecommerce-backend2-qqsc.onrender.com';
 
@@ -52,8 +50,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
       if (kIsWeb) {
         // On web, Payment Sheet is not supported. Use Stripe Checkout instead.
         final checkoutUrl = await createCheckoutSession(widget.totalAmount);
-        // Redirect the user to the Checkout page
-        html.window.location.href = checkoutUrl;
+        // Use url_launcher to open the checkoutUrl in a new tab or window
+        final uri = Uri.parse(checkoutUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          print("Could not launch $checkoutUrl");
+        }
       } else {
         // On mobile (iOS/Android), use Payment Sheet
         paymentIntentData = await createPaymentIntent(
@@ -114,9 +117,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-  // New method for creating a Checkout Session on web
   Future<String> createCheckoutSession(double amount) async {
-    // Convert amount to cents for Stripe
     int amountInCents = (amount * 100).toInt();
 
     final response = await http.post(
@@ -127,7 +128,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['url']; // Expecting your backend to return { "url": "..." }
+      return data['url'];
     } else {
       throw Exception('Failed to create checkout session: ${response.body}');
     }
