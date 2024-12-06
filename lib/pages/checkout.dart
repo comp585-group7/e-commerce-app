@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+// Only available on web. If building for mobile, this import will be inert.
+import 'dart:html' as html;
 
 const String backendUrl = 'https://ecommerce-backend2-qqsc.onrender.com';
 
@@ -45,19 +49,27 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Future<void> makePayment() async {
     try {
-      paymentIntentData = await createPaymentIntent(
-        widget.totalAmount.toString(),
-        'usd',
-      );
+      if (kIsWeb) {
+        // On web, Payment Sheet is not supported. Use Stripe Checkout instead.
+        final checkoutUrl = await createCheckoutSession(widget.totalAmount);
+        // Redirect the user to the Checkout page
+        html.window.location.href = checkoutUrl;
+      } else {
+        // On mobile (iOS/Android), use Payment Sheet
+        paymentIntentData = await createPaymentIntent(
+          widget.totalAmount.toString(),
+          'usd',
+        );
 
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntentData!['clientSecret'],
-          merchantDisplayName: 'StyleHive',
-        ),
-      );
+        await Stripe.instance.initPaymentSheet(
+          paymentSheetParameters: SetupPaymentSheetParameters(
+            paymentIntentClientSecret: paymentIntentData!['clientSecret'],
+            merchantDisplayName: 'StyleHive',
+          ),
+        );
 
-      await displayPaymentSheet();
+        await displayPaymentSheet();
+      }
     } catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +78,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-  displayPaymentSheet() async {
+  Future<void> displayPaymentSheet() async {
     try {
       await Stripe.instance.presentPaymentSheet();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -99,6 +111,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
       }
     } catch (err) {
       throw Exception('Error creating payment intent: $err');
+    }
+  }
+
+  // New method for creating a Checkout Session on web
+  Future<String> createCheckoutSession(double amount) async {
+    // Convert amount to cents for Stripe
+    int amountInCents = (amount * 100).toInt();
+
+    final response = await http.post(
+      Uri.parse('$backendUrl/create-checkout-session'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'amount': amountInCents, 'currency': 'usd'}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['url']; // Expecting your backend to return { "url": "..." }
+    } else {
+      throw Exception('Failed to create checkout session: ${response.body}');
     }
   }
 }
