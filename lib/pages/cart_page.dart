@@ -124,27 +124,24 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  // Helper methods...
-
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 8.0, horizontal: 16.0), // Adds padding on the sides
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: Colors.black,
-          borderRadius: BorderRadius.circular(8.0), // Rounded square shape
+          borderRadius: BorderRadius.circular(8.0),
         ),
         child: Text(
           title,
           style: const TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.bold,
-            color: Colors.white, // White font color
+            color: Colors.white,
           ),
-          textAlign: TextAlign.center, // Center the text within the container
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -154,10 +151,10 @@ class _CartPageState extends State<CartPage> {
     required Product item,
     required Function(int) onRemove,
     required Function(int, int) onUpdateQuantity,
-    Function()? onTap, // Optional callback for item click
+    Function()? onTap,
   }) {
     return GestureDetector(
-      onTap: onTap, // Triggered when the item is tapped
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         padding: const EdgeInsets.all(8),
@@ -168,9 +165,8 @@ class _CartPageState extends State<CartPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image of the cart item
             ClipRRect(
-              borderRadius: BorderRadius.circular(8), // Rounded image corners
+              borderRadius: BorderRadius.circular(8),
               child: Image.network(
                 item.image,
                 width: 80.0,
@@ -181,14 +177,11 @@ class _CartPageState extends State<CartPage> {
                 },
               ),
             ),
-            const SizedBox(width: 8), // Spacing between image and text
-
-            // Item details
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product Name
                   Text(
                     item.name,
                     style: const TextStyle(
@@ -196,10 +189,9 @@ class _CartPageState extends State<CartPage> {
                       fontSize: 16.0,
                     ),
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis, // Handle long names
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Quantity and Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -207,7 +199,7 @@ class _CartPageState extends State<CartPage> {
                       IconButton(
                         icon: const Icon(Icons.remove),
                         constraints: const BoxConstraints(maxHeight: 24),
-                        padding: EdgeInsets.zero, // Compact buttons
+                        padding: EdgeInsets.zero,
                         onPressed: () {
                           onUpdateQuantity(item.id, item.quantity - 1);
                         },
@@ -221,7 +213,7 @@ class _CartPageState extends State<CartPage> {
                           onUpdateQuantity(item.id, item.quantity + 1);
                         },
                       ),
-                      const SizedBox(width: 8), // Spacing before price
+                      const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           'Price: \$${item.price.toStringAsFixed(2)}',
@@ -235,8 +227,6 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             ),
-
-            // Delete button
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
@@ -267,7 +257,6 @@ class _CartPageState extends State<CartPage> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to ShopPage
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -318,11 +307,13 @@ class _CartPageState extends State<CartPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to CheckoutPage
+                    // Navigate to CheckoutPage with total amount
+                    double total = _calculateTotalPrice();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const CheckoutPage()),
+                        builder: (context) => CheckoutPage(totalAmount: total),
+                      ),
                     );
                   },
                   child: const Text('Checkout'),
