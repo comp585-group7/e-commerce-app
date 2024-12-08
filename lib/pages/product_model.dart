@@ -6,7 +6,8 @@ class Product {
   final String image;
   final String name;
   final double price;
-  int quantity; // Made mutable
+  final String category; // New field for category
+  int quantity; // mutable
 
   Product({
     required this.description,
@@ -14,7 +15,8 @@ class Product {
     required this.image,
     required this.name,
     required this.price,
-    this.quantity = 1, // Default quantity to 1
+    required this.category,
+    this.quantity = 1,
   });
 
   factory Product.fromFirestore(DocumentSnapshot doc) {
@@ -26,11 +28,11 @@ class Product {
       image: data['image'] ?? '',
       name: data['name'] ?? '',
       price: (data['price'] as num?)?.toDouble() ?? 0.0,
+      category: data['category'] ?? '',
       quantity: data['quantity'] ?? 1,
     );
   }
 
-  // Method to convert Product to Map (useful for adding to cart)
   Map<String, dynamic> toMap() {
     return {
       'description': description,
@@ -38,6 +40,7 @@ class Product {
       'image': image,
       'name': name,
       'price': price,
+      'category': category,
       'quantity': quantity,
     };
   }

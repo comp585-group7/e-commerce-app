@@ -17,7 +17,6 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
-  final ScrollController _scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
 
   List<Product> products = [];
@@ -25,31 +24,41 @@ class _ShopPageState extends State<ShopPage> {
   List<Category> categories = [];
   bool isLoading = true;
 
+  // A set of selected categories from the filter panel
+  Set<String> selectedCategories = {};
+
   @override
   void initState() {
     super.initState();
     _initializePage();
 
-    // Update search results as the user types
     searchController.addListener(() {
-      filterSearchResults(searchController.text);
+      filterSearchResults();
     });
   }
 
   Future<void> _initializePage() async {
     await _loadProductData();
-    await _loadCatalogData();
 
-    // Apply category filter if provided
+    // Once products are loaded, derive categories
+    final uniqueCategories = products.map((p) => p.category).toSet();
+    categories = uniqueCategories.map((catName) {
+      return Category(
+        name: catName,
+        image: "", // Not using images for categories
+      );
+    }).toList();
+
+    // If a category was passed, select it and apply it
     if (widget.category != null && widget.category!.isNotEmpty) {
-      final searchTerm = widget.category!;
-      if (products.isNotEmpty) {
-        setState(() {
-          searchController.text = searchTerm;
-          filterSearchResults(searchTerm);
-        });
-      }
+      setState(() {
+        searchController.text = widget.category!;
+        selectedCategories.add(widget.category!);
+      });
     }
+
+    // Initially show all products since no filters or search are applied
+    searchResults = products;
 
     setState(() {
       isLoading = false;
@@ -67,96 +76,64 @@ class _ShopPageState extends State<ShopPage> {
 
       setState(() {
         products = productList;
-        searchResults = productList;
       });
     } catch (e) {
       print('Error loading products: $e');
     }
   }
 
-  // Load categories from Firestore
-  Future<void> _loadCatalogData() async {
-    try {
-      final querySnapshot =
-          await FirebaseFirestore.instance.collection('categories').get();
+  void filterSearchResults() {
+    if (isLoading) return; // Don't filter if still loading
 
-      final categoryList =
-          querySnapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
+    final query = searchController.text.trim().toLowerCase();
 
-      setState(() {
-        categories = categoryList;
-      });
-    } catch (e) {
-      print('Error loading categories: $e');
-    }
-  }
+    // Start with all products
+    List<Product> results = products;
 
-  void _scrollRight() {
-    _scrollController.animateTo(
-      _scrollController.offset + 300,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void _scrollLeft() {
-    _scrollController.animateTo(
-      _scrollController.offset - 300,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void filterSearchResults(String query) {
-    if (query.isNotEmpty) {
-      final results = products.where((product) {
-        return product.name.toLowerCase().contains(query.toLowerCase());
+    // Filter by selected categories if any
+    if (selectedCategories.isNotEmpty) {
+      results = results.where((product) {
+        return selectedCategories.contains(product.category);
       }).toList();
-      setState(() {
-        searchResults = results;
-      });
-    } else {
-      setState(() {
-        searchResults = products;
-      });
     }
+
+    // Further filter by search query if present
+    if (query.isNotEmpty) {
+      results = results.where((product) {
+        final matchesName = product.name.toLowerCase().contains(query);
+        final matchesCategory = product.category.toLowerCase().contains(query);
+        return matchesName || matchesCategory;
+      }).toList();
+    }
+
+    setState(() {
+      searchResults = results;
+    });
   }
 
-  Widget _buildCategoryCard(Category category) {
-    return GestureDetector(
-      onTap: () {
-        filterSearchResults(category.name);
-        searchController.text = category.name;
+  Widget _buildCategoryCheckboxes() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final cat = categories[index];
+        final isSelected = selectedCategories.contains(cat.name);
+        return CheckboxListTile(
+          title: Text(cat.name),
+          value: isSelected,
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                selectedCategories.add(cat.name);
+              } else {
+                selectedCategories.remove(cat.name);
+              }
+            });
+            filterSearchResults();
+          },
+        );
       },
-      child: Card(
-        color: Colors.white, // Ensure the category card is white
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Image.network(
-                category.image,
-                width: 30,
-                height: 30,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.error);
-                },
-              ),
-              const SizedBox(width: 10),
-              Text(
-                category.name,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -181,7 +158,7 @@ class _ShopPageState extends State<ShopPage> {
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
             child: Card(
-              color: Colors.white, // Ensure the product card is white
+              color: Colors.white,
               elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: const BorderRadius.only(
@@ -242,57 +219,6 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  Widget _buildCategoriesSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15.0),
-      child: Column(
-        children: [
-          // Section title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Categories',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: _scrollLeft,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    children: categories.map((category) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: _buildCategoryCard(category),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: _scrollRight,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 15.0, 16.0, 10.0),
@@ -305,7 +231,7 @@ class _ShopPageState extends State<ShopPage> {
             icon: const Icon(Icons.clear),
             onPressed: () {
               searchController.clear();
-              filterSearchResults('');
+              filterSearchResults();
             },
           ),
           border: OutlineInputBorder(
@@ -321,6 +247,7 @@ class _ShopPageState extends State<ShopPage> {
     final isSmallScreen = screenWidth < 830;
 
     if (isLoading) {
+      // While loading, maybe show a loading spinner
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 40.0),
@@ -329,7 +256,8 @@ class _ShopPageState extends State<ShopPage> {
       );
     }
 
-    if (searchResults.isEmpty) {
+    // If products is empty from the database, show 'No products found.'
+    if (searchResults.isEmpty && products.isEmpty) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 40.0),
@@ -342,7 +270,7 @@ class _ShopPageState extends State<ShopPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -362,29 +290,56 @@ class _ShopPageState extends State<ShopPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Filters panel background is white
     return Scaffold(
       appBar: widget.appBarBuilder(context),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildSearchBar(),
-            _buildCategoriesSection(),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Products',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left-side filter panel with white background
+          Container(
+            width: 250,
+            color: Colors.white,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filters',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Categories',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildCategoryCheckboxes(), // Renamed method to avoid duplicates
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            _buildProductsSection(),
-            const SizedBox(height: 40),
-          ],
-        ),
+          ),
+
+          // Main product section
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSearchBar(),
+                  // Removed the 'Products' title here
+                  const SizedBox(height: 10),
+                  _buildProductsSection(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

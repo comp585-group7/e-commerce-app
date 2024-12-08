@@ -48,14 +48,15 @@ class _CartPageState extends State<CartPage> {
           .where('userId', isEqualTo: user!.uid)
           .get();
 
-      List<Product> items = querySnapshot.docs.map((doc) {
+      List<Product> items = querySnapshot.docs.map<Product>((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return Product(
-          id: data['productId'] ?? 0,
-          name: data['name'] ?? '',
           description: data['description'] ?? '',
+          id: data['productId'] ?? 0,
           image: data['image'] ?? '',
+          name: data['name'] ?? '',
           price: (data['price'] as num?)?.toDouble() ?? 0.0,
+          category: data['category'] ?? '',
           quantity: data['quantity'] ?? 1,
         );
       }).toList();

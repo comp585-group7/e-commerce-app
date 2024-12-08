@@ -23,7 +23,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadProductData();
-    _loadCatalogData();
   }
 
   Future<void> _loadProductData() async {
@@ -35,24 +34,19 @@ class _HomePageState extends State<HomePage> {
 
       setState(() {
         products = productList;
+        // Generate categories from products themselves
+        final uniqueCategories = products.map((p) => p.category).toSet();
+
+        // Map these category names to Category objects without images
+        categories = uniqueCategories.map((catName) {
+          return Category(
+            name: catName,
+            image: "", // We are not using images for categories now
+          );
+        }).toList();
       });
     } catch (e) {
       print('Error loading products: $e');
-    }
-  }
-
-  Future<void> _loadCatalogData() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('categories').get();
-      List<Category> categoryList =
-          querySnapshot.docs.map((doc) => Category.fromFirestore(doc)).toList();
-
-      setState(() {
-        categories = categoryList;
-      });
-    } catch (e) {
-      print('Error loading categories: $e');
     }
   }
 
@@ -89,27 +83,18 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
-          child: Row(
-            children: [
-              Image.network(
-                category.image,
-                width: 30,
-                height: 30,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.error);
-                },
-              ),
-              const SizedBox(width: 10),
-              Text(
-                category.name,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-              ),
-            ],
+        child: Center(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            child: Text(
+              category.name,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+            ),
           ),
         ),
       ),
@@ -339,6 +324,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 10),
+        // Display categories as text only, centered
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: GridView.count(
@@ -448,8 +434,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// A reusable widget that provides hover scaling effects for its child.
-/// Works best on web/desktop; on mobile it just displays normally.
 class _AnimatedHoverContainer extends StatefulWidget {
   final Widget child;
   final double? width;

@@ -43,17 +43,36 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     try {
       final cartCollection = FirebaseFirestore.instance.collection('cart');
 
-      await cartCollection.add({
-        'userId': user!.uid,
-        'productId': widget.product.id,
-        'name': widget.product.name,
-        'price': widget.product.price,
-        'image': widget.product.image,
-        'quantity': quantity,
-        'description': widget.product.description,
-      });
+      // Check if the product is already in the user's cart
+      final querySnapshot = await cartCollection
+          .where('userId', isEqualTo: user!.uid)
+          .where('productId', isEqualTo: widget.product.id)
+          .limit(1)
+          .get();
 
-      _showAddToCartDialog(context, 'Item added to cart');
+      if (querySnapshot.docs.isNotEmpty) {
+        // Product already exists in the cart, update its quantity
+        final docRef = querySnapshot.docs.first.reference;
+        final currentData = querySnapshot.docs.first.data();
+        final currentQuantity = currentData['quantity'] ?? 1;
+        final newQuantity = currentQuantity + quantity;
+
+        await docRef.update({'quantity': newQuantity});
+        _showAddToCartDialog(context, 'Quantity updated in cart');
+      } else {
+        // Product not in cart, add a new entry
+        await cartCollection.add({
+          'userId': user!.uid,
+          'productId': widget.product.id,
+          'name': widget.product.name,
+          'price': widget.product.price,
+          'image': widget.product.image,
+          'quantity': quantity,
+          'description': widget.product.description,
+        });
+
+        _showAddToCartDialog(context, 'Item added to cart');
+      }
     } catch (e) {
       print('Error adding to cart: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -258,7 +277,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   }
 }
 
-/// A small widget for quantity buttons (plus and minus) to keep code clean.
+/// A small widget for quantity buttons (plus and minus)
 class _QuantityButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onPressed;
