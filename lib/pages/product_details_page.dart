@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'product_model.dart'; // Import the Product model
+import 'product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'cart_page.dart'; // Import CartPage
-import 'app_bar.dart'; // Import your buildAppBar function
+import 'cart_page.dart';
+import 'app_bar.dart';
 import 'shop_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_page.dart'; // Import LoginPage
+import 'login_page.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -30,11 +30,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     user = _auth.currentUser; // Assign current user
   }
 
-  // Method to add the product to the cart
   Future<void> _addToCart(BuildContext context) async {
     if (user == null) {
-      // User is not logged in
-      // Redirect to LoginPage
+      // User is not logged in, redirect to LoginPage
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -55,7 +53,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         'description': widget.product.description,
       });
 
-      // Show confirmation dialog
       _showAddToCartDialog(context, 'Item added to cart');
     } catch (e) {
       print('Error adding to cart: $e');
@@ -65,14 +62,24 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     }
   }
 
-  // Method to show the dialog when "Add to Cart" is pressed
   void _showAddToCartDialog(BuildContext context, String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(message),
-          content: const Text('Would you like to shop for more?'),
+          backgroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: Text(
+            message,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          content: const Text(
+            'Would you like to shop more or go to your cart?',
+            style: TextStyle(fontSize: 16),
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -84,6 +91,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                 );
               },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+              ),
               child: const Text('Go to Cart'),
             ),
             TextButton(
@@ -96,6 +106,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                 );
               },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+              ),
               child: const Text('Shop More'),
             ),
           ],
@@ -106,119 +119,182 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Build your UI using widget.product
+    final product = widget.product;
+    final priceText = '\$${product.price.toStringAsFixed(2)}';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Details'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        // Rest of your UI code remains the same
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Image Section
-            SizedBox(
-              height: 250,
-              child: Image.network(
-                widget.product.image,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.error);
-                },
+        title: Text(
+          'Product Details',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-            ),
-            const SizedBox(height: 20),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Product Image
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    product.image,
+                    height: 300,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.error,
+                          size: 50, color: Colors.red);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
 
-            // Product Info and Description Section
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      widget.product.name,
-                      style: const TextStyle(
-                        fontSize: 24.0,
+              // Product Info Card
+              Card(
+                color: Colors.white,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        product.name,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        priceText,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        product.description,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Quantity Selector
+              Text(
+                'Quantity',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _QuantityButton(
+                    icon: Icons.remove,
+                    onPressed: () {
+                      if (quantity > 1) {
+                        setState(() => quantity--);
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 15),
+                  Text(
+                    quantity.toString(),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(width: 15),
+                  _QuantityButton(
+                    icon: Icons.add,
+                    onPressed: () {
+                      setState(() => quantity++);
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+
+              // Add to Cart Button
+              ElevatedButton(
+                onPressed: () => _addToCart(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                ),
+                child: Text(
+                  'Add to Cart',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '\$${widget.product.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.green,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.product.description,
-                      style: const TextStyle(fontSize: 16.0),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ),
               ),
-            ),
-            const Divider(height: 40, thickness: 1.5),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-            // Quantity Selector Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Quantity:',
-                  style: TextStyle(fontSize: 18.0),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: () {
-                        if (quantity > 1) {
-                          setState(() {
-                            quantity--;
-                          });
-                        }
-                      },
-                    ),
-                    Text(
-                      quantity.toString(),
-                      style: const TextStyle(fontSize: 18.0),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        setState(() {
-                          quantity++;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+/// A small widget for quantity buttons (plus and minus) to keep code clean.
+class _QuantityButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
 
-            const Spacer(),
+  const _QuantityButton({Key? key, required this.icon, required this.onPressed})
+      : super(key: key);
 
-            // Add to Cart Button
-            ElevatedButton(
-              onPressed: () => _addToCart(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-              ),
-              child: const Text(
-                'Add to Cart',
-                style: TextStyle(fontSize: 18.0, color: Colors.white),
-              ),
+  @override
+  State<_QuantityButton> createState() => _QuantityButtonState();
+}
+
+class _QuantityButtonState extends State<_QuantityButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = _hovering ? 1.1 : 1.0;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedScale(
+          scale: scale,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          child: CircleAvatar(
+            backgroundColor: Colors.black,
+            radius: 16,
+            child: Icon(
+              widget.icon,
+              color: Colors.white,
+              size: 20,
             ),
-          ],
+          ),
         ),
       ),
     );

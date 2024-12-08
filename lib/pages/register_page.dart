@@ -16,6 +16,8 @@ class _RegisterPageState extends State<RegisterPage> {
   // Controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   // Form Key for validation
   final _formKey = GlobalKey<FormState>();
@@ -91,6 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -168,6 +171,28 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
                         if (value.trim().length < 6) {
                           return 'Password must be at least 6 characters.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    // Confirm Password input
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'Confirm Password',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please confirm your password.';
+                        }
+                        if (value.trim() != _passwordController.text.trim()) {
+                          return 'Passwords do not match.';
                         }
                         return null;
                       },
