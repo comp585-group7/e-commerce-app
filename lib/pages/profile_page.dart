@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
-import 'home_page.dart'; // Import HomePage
+import 'home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
 
-  const ProfilePage({
-    Key? key,
-    required this.appBarBuilder,
-  }) : super(key: key);
+  const ProfilePage({Key? key, required this.appBarBuilder}) : super(key: key);
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? user; // Make user nullable
+  User? user; // Nullable user to handle logged-out states.
   bool isLoading = false;
 
   @override
@@ -25,59 +22,76 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     user = _auth.currentUser;
 
+    // If user is not logged in, redirect to the LoginPage immediately.
     if (user == null) {
-      // User is not logged in, redirect to LoginPage
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       });
-      return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // If user is null (not logged in), return an empty widget.
     if (user == null) {
-      // Return an empty widget while redirecting
       return const SizedBox.shrink();
     }
 
-    String email = user!.email ?? "No Email";
+    final String email = user!.email ?? "No Email";
+    final String userName = _getUserName(email);
 
     return Scaffold(
       appBar: widget.appBarBuilder(context),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              // Your existing profile UI code
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Profile Header
+                  // Profile Header Card
                   Card(
-                    color: Colors.green,
+                    color: Colors.blueGrey.shade50,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
+                    elevation: 2,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.person,
-                            size: 32.0,
-                            color: Colors.white,
+                          CircleAvatar(
+                            backgroundColor: Colors.orangeAccent,
+                            radius: 24.0,
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 30,
+                            ),
                           ),
                           const SizedBox(width: 16),
-                          const Text(
-                            "Hello!",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24.0,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Hello, $userName",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24.0,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Welcome back to your account",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -86,29 +100,30 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 20),
 
                   // Personal Information Section
-                  _buildSectionHeader("Personal Information"),
+                  _buildSectionHeader(context, "Personal Information",
+                      icon: Icons.info_outline),
                   const SizedBox(height: 10),
                   ListTile(
                     leading: const Icon(Icons.email),
-                    title: Text("Email: $email"),
+                    title: Text(
+                      "Email: $email",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                     subtitle: const Text("Tap to edit your email address"),
                     trailing: const Icon(Icons.edit),
-                    onTap: () {
-                      _showEditEmailDialog(context);
-                    },
+                    onTap: () => _showEditEmailDialog(context),
                   ),
                   const Divider(height: 20, thickness: 1),
 
                   // Account Settings Section
-                  _buildSectionHeader("Account Settings"),
+                  _buildSectionHeader(context, "Account Settings",
+                      icon: Icons.settings),
                   const SizedBox(height: 10),
                   ListTile(
                     leading: const Icon(Icons.lock),
                     title: const Text("Change Password"),
                     trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      _showChangePasswordDialog(context);
-                    },
+                    onTap: () => _showChangePasswordDialog(context),
                   ),
                   ListTile(
                     leading: const Icon(Icons.logout),
@@ -116,10 +131,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     trailing: const Icon(Icons.arrow_forward_ios),
                     onTap: () async {
                       await _auth.signOut();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomePage()),
-                      );
+                      if (mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomePage()),
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 10),
@@ -129,33 +147,50 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Helper method to build section headers
-  Widget _buildSectionHeader(String title) {
+  // Extracts a user-friendly username from the email (just the part before '@')
+  String _getUserName(String email) {
+    if (email.contains('@')) {
+      return email.split('@').first;
+    }
+    return email;
+  }
+
+  // Builds a styled section header with an optional icon
+  Widget _buildSectionHeader(BuildContext context, String title,
+      {IconData? icon}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.bold,
-        ),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 20),
+            const SizedBox(width: 8),
+          ],
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
+                ),
+          ),
+        ],
       ),
     );
   }
 
-  // Method to show the dialog for editing email
+  // Shows a dialog to edit the user's email address
   void _showEditEmailDialog(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
     String newEmail = '';
     String password = '';
-    final _formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Edit Email'),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -172,22 +207,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                     return null;
                   },
-                  onChanged: (value) {
-                    newEmail = value;
-                  },
+                  onChanged: (value) => newEmail = value,
                 ),
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Password'),
                   obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password to confirm';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    password = value;
-                  },
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? 'Enter your password to confirm'
+                      : null,
+                  onChanged: (value) => password = value,
                 ),
               ],
             ),
@@ -195,15 +223,13 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
               child: const Text('Save'),
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.of(context).pop(); // Close the dialog
+                if (formKey.currentState!.validate()) {
+                  Navigator.of(dialogContext).pop(); // Close dialog
                   await _updateEmail(newEmail, password);
                 }
               },
@@ -214,32 +240,27 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Method to update the email
+  // Updates the user's email, re-authenticating if necessary
   Future<void> _updateEmail(String newEmail, String password) async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      // Re-authenticate the user
-      AuthCredential credential = EmailAuthProvider.credential(
+      final credential = EmailAuthProvider.credential(
         email: user!.email!,
         password: password,
       );
-
       await user!.reauthenticateWithCredential(credential);
-
-      // Update the email
       await user!.updateEmail(newEmail);
       await user!.reload();
-      user = _auth.currentUser;
+      user = FirebaseAuth.instance.currentUser;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email updated successfully')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email updated successfully')),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       String message;
-
       if (e.code == 'email-already-in-use') {
         message = 'This email is already in use.';
       } else if (e.code == 'invalid-email') {
@@ -250,33 +271,34 @@ class _ProfilePageState extends State<ProfilePage> {
         message = 'An error occurred. Please try again.';
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred. Please try again.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An error occurred. Please try again.')),
+        );
+      }
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
-  // Method to show the dialog for changing password
+  // Shows a dialog to change the user's password
   void _showChangePasswordDialog(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
     String newPassword = '';
     String currentPassword = '';
-    final _formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Change Password'),
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -284,19 +306,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration:
                       const InputDecoration(labelText: 'Current Password'),
                   obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your current password';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    currentPassword = value;
-                  },
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? 'Please enter your current password'
+                      : null,
+                  onChanged: (value) => currentPassword = value,
                 ),
                 TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'New Password'),
+                  decoration: const InputDecoration(labelText: 'New Password'),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -306,9 +322,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                     return null;
                   },
-                  onChanged: (value) {
-                    newPassword = value;
-                  },
+                  onChanged: (value) => newPassword = value,
                 ),
               ],
             ),
@@ -316,15 +330,13 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
               child: const Text('Change'),
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.of(context).pop(); // Close the dialog
+                if (formKey.currentState!.validate()) {
+                  Navigator.of(dialogContext).pop(); // Close dialog
                   await _changePassword(currentPassword, newPassword);
                 }
               },
@@ -335,33 +347,28 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Method to change password
+  // Changes the user's password after re-authenticating
   Future<void> _changePassword(
       String currentPassword, String newPassword) async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      // Re-authenticate the user
-      AuthCredential credential = EmailAuthProvider.credential(
+      final credential = EmailAuthProvider.credential(
         email: user!.email!,
         password: currentPassword,
       );
-
       await user!.reauthenticateWithCredential(credential);
-
-      // Update the password
       await user!.updatePassword(newPassword);
       await user!.reload();
-      user = _auth.currentUser;
+      user = FirebaseAuth.instance.currentUser;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password changed successfully')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password changed successfully')),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       String message;
-
       if (e.code == 'weak-password') {
         message = 'The password is too weak.';
       } else if (e.code == 'wrong-password') {
@@ -370,17 +377,18 @@ class _ProfilePageState extends State<ProfilePage> {
         message = 'An error occurred. Please try again.';
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred. Please try again.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An error occurred. Please try again.')),
+        );
+      }
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) setState(() => isLoading = false);
     }
   }
 }

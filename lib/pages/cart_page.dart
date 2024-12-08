@@ -29,7 +29,7 @@ class _CartPageState extends State<CartPage> {
     user = _auth.currentUser;
 
     if (user == null) {
-      // Redirect to LoginPage
+      // Redirect to LoginPage if not logged in
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
@@ -126,23 +126,13 @@ class _CartPageState extends State<CartPage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          textAlign: TextAlign.center,
-        ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+        textAlign: TextAlign.left,
       ),
     );
   }
@@ -153,82 +143,90 @@ class _CartPageState extends State<CartPage> {
     required Function(int, int) onUpdateQuantity,
     Function()? onTap,
   }) {
-    return GestureDetector(
+    return _AnimatedHoverContainer(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300, width: 1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                bottomLeft: Radius.circular(12),
+              ),
               child: Image.network(
                 item.image,
-                width: 80.0,
-                height: 80.0,
+                width: 90.0,
+                height: 90.0,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.image_not_supported, size: 80);
+                  return const SizedBox(
+                    width: 90,
+                    height: 90,
+                    child: Icon(Icons.image_not_supported, size: 40),
+                  );
                 },
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Text('Quantity: '),
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        constraints: const BoxConstraints(maxHeight: 24),
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          onUpdateQuantity(item.id, item.quantity - 1);
-                        },
-                      ),
-                      Text('${item.quantity}'),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        constraints: const BoxConstraints(maxHeight: 24),
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          onUpdateQuantity(item.id, item.quantity + 1);
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'Price: \$${item.price.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 14.0),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Text('Quantity: '),
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          constraints: const BoxConstraints(maxHeight: 24),
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            onUpdateQuantity(item.id, item.quantity - 1);
+                          },
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        Text('${item.quantity}'),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          constraints: const BoxConstraints(maxHeight: 24),
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            onUpdateQuantity(item.id, item.quantity + 1);
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Price: \$${item.price.toStringAsFixed(2)}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: const Icon(Icons.delete, color: Colors.redAccent),
               onPressed: () {
                 onRemove(item.id);
               },
@@ -241,39 +239,66 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double total = _calculateTotalPrice();
     return Scaffold(
       appBar: widget.appBarBuilder(context),
       body: cartItems.isEmpty
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSectionHeader("Cart"),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Your cart is empty.",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ShopPage(
-                            appBarBuilder: buildAppBar,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 40.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Your Cart",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                      );
-                    },
-                    child: const Text('Browse Products'),
-                  ),
-                ],
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Your cart is empty.",
+                      style: TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0)),
+                      ),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShopPage(
+                              appBarBuilder: buildAppBar,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Browse Products',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildSectionHeader("Cart"),
+                _buildSectionHeader("Your Cart"),
                 Expanded(
                   child: ListView.builder(
                     itemCount: cartItems.length,
@@ -298,29 +323,90 @@ class _CartPageState extends State<CartPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 20),
                   child: Text(
-                    'Total: \$${_calculateTotalPrice().toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                    'Total: \$${total.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.right,
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to CheckoutPage with total amount
-                    double total = _calculateTotalPrice();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CheckoutPage(totalAmount: total),
-                      ),
-                    );
-                  },
-                  child: const Text('Checkout'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 10),
+                  child: ElevatedButton(
+                    onPressed: total > 0
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CheckoutPage(totalAmount: total),
+                              ),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0)),
+                    ),
+                    child: Text(
+                      'Checkout',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 15),
               ],
             ),
+    );
+  }
+}
+
+/// A container that provides a subtle hover scaling effect on desktop/web.
+class _AnimatedHoverContainer extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+
+  const _AnimatedHoverContainer({Key? key, required this.child, this.onTap})
+      : super(key: key);
+
+  @override
+  State<_AnimatedHoverContainer> createState() =>
+      _AnimatedHoverContainerState();
+}
+
+class _AnimatedHoverContainerState extends State<_AnimatedHoverContainer> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = _hovering ? 1.02 : 1.0;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() {
+        _hovering = true;
+      }),
+      onExit: (_) => setState(() {
+        _hovering = false;
+      }),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: scale,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          child: widget.child,
+        ),
+      ),
     );
   }
 }

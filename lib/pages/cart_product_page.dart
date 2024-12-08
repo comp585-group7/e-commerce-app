@@ -18,41 +18,49 @@ class CartProductPage extends StatefulWidget {
   final int productId;
   final int productQuantity;
 
-  const CartProductPage(
-      {super.key,
-      required this.productName,
-      required this.productDescription,
-      required this.productImage,
-      required this.productPrice,
-      required this.productId,
-      required this.productQuantity});
+  const CartProductPage({
+    Key? key,
+    required this.productName,
+    required this.productDescription,
+    required this.productImage,
+    required this.productPrice,
+    required this.productId,
+    required this.productQuantity,
+  }) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _CartProductPageState createState() => _CartProductPageState();
 }
 
-// Checks for the platform if its on Android
-  bool isAndroid() {
-    if (kIsWeb) {
-      return false;
-    } else {
-      return Platform.isAndroid;
-    }
+bool isAndroid() {
+  if (kIsWeb) {
+    return false;
+  } else {
+    return Platform.isAndroid;
   }
+}
 
-// Method to show the dialog when "Add to Cart" is pressed
+// Dialog when actions are performed
 void _showAddToCartDialog(BuildContext context, String message) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(message),
-        content: const Text('Would you like to shop for more?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          message,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        content: const Text(
+          'Would you like to shop more?',
+          style: TextStyle(fontSize: 16),
+        ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close the dialog
+              Navigator.pop(context); // Close dialog
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -60,11 +68,14 @@ void _showAddToCartDialog(BuildContext context, String message) {
                 ),
               );
             },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black,
+            ),
             child: const Text('Go to Cart'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close the dialog
+              Navigator.pop(context); // Close dialog
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -72,6 +83,9 @@ void _showAddToCartDialog(BuildContext context, String message) {
                 ),
               );
             },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black,
+            ),
             child: const Text('Shop More'),
           ),
         ],
@@ -84,19 +98,13 @@ Future<List<dynamic>> fetchCartItems() async {
   const url = 'http://localhost:5000/api/cart'; // Endpoint URL
 
   try {
-    // Perform the GET request
     final response = await http.get(Uri.parse(url));
-
-    // Check for successful status code
     if (response.statusCode == 200) {
-      // Parse the JSON response
       return jsonDecode(response.body);
     } else {
-      // Handle non-200 status codes
       throw Exception('Failed to load cart items: ${response.statusCode}');
     }
   } catch (error) {
-    // Handle network or decoding errors
     throw Exception('Error fetching cart items: $error');
   }
 }
@@ -104,160 +112,213 @@ Future<List<dynamic>> fetchCartItems() async {
 void loadCartItems() async {
   try {
     List<dynamic> cartItems = await fetchCartItems();
-    print(cartItems); // Do something with the cart items
+    print(cartItems);
   } catch (error) {
     print('Error: $error');
   }
 }
 
 class _CartProductPageState extends State<CartProductPage> {
-  int quantity = 1; // Default quantity
-
-  // Add items to the cart via the Flask API
-  Future<void> _addToCart(BuildContext context, int quantity) async {
-    final cartItem = {
-      'id': widget.productId.toString(),
-      'name': widget.productName,
-      'price': widget.productPrice,
-      'quantity': quantity,
-      'image': widget.productImage,
-      'desc': widget.productDescription
-    };
-
-    final response = await http.post(
-      Uri.parse('http://localhost:5000/api/cart'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(cartItem),
-    );
-
-    if (response.statusCode == 201) {
-      _showAddToCartDialog(context, "Added to cart: ${widget.productName}");
-    } else {
-      _showAddToCartDialog(context, "Failed to add item to cart");
-    }
-  }
+  int quantity = 1;
+  int _currentPage = 0;
 
   @override
   Widget build(BuildContext context) {
+    final priceText = '\$${widget.productPrice.toStringAsFixed(2)}';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Cart Product Details')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      appBar: AppBar(
+        title: Text(
+          'Cart Product Details',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Image Carousel Section
             SizedBox(
               height: 250,
-              child: PageView.builder(
-                itemCount: 3, // Display the same image multiple times for now
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    widget.productImage,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons
-                          .error); // Show an error icon if image fails to load
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    itemCount:
+                        3, // Just displaying the same image multiple times
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
                     },
-                  );
-                },
+                    itemBuilder: (context, index) {
+                      return Image.network(
+                        widget.productImage,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.error,
+                              size: 40, color: Colors.red);
+                        },
+                      );
+                    },
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(3, (index) {
+                        return Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPage == index
+                                ? Colors.black
+                                : Colors.black.withOpacity(0.3),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
             // Product Info and Description Section
             Card(
-              elevation: 2,
+              color: Colors.white,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       widget.productName,
-                      style: const TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      '\$${widget.productPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.green,
-                      ),
+                      priceText,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
                     Text(
                       widget.productDescription,
-                      style: const TextStyle(fontSize: 16.0),
+                      style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
             ),
-            const Divider(height: 40, thickness: 1.5),
+            const SizedBox(height: 30),
 
             // Quantity Selector Section
+            Text(
+              'Quantity',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Text(
-                  'Quantity:',
-                  style: TextStyle(fontSize: 18.0),
+                _QuantityButton(
+                  icon: Icons.remove,
+                  onPressed: () {
+                    if (quantity > 1) {
+                      setState(() {
+                        quantity--;
+                      });
+                    }
+                  },
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: () {
-                        if (quantity > 1) {
-                          setState(() {
-                            quantity--;
-                          });
-                        }
-                      },
-                    ),
-                    Text(
-                      quantity.toString(),
-                      style: const TextStyle(fontSize: 18.0),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        setState(() {
-                          quantity++;
-                        });
-                      },
-                    ),
-                  ],
+                const SizedBox(width: 15),
+                Text(
+                  quantity.toString(),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(width: 15),
+                _QuantityButton(
+                  icon: Icons.add,
+                  onPressed: () {
+                    setState(() {
+                      quantity++;
+                    });
+                  },
                 ),
               ],
             ),
 
-            const Spacer(),
+            // Spacer if needed
+            const SizedBox(height: 60),
 
-            /*
-            // No need for this on the Cart product since its already on the cart already, 
-            //  we might need a new function just in case the user does want to add more onto their cart list
-            // Add to Cart Button
-            ElevatedButton(
-              onPressed: () => _addToCart(context, quantity),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-              ),
-              child: const Text(
-                'Add to Cart',
-                style: TextStyle(fontSize: 18.0, color: Colors.white),
-              ),
-            ),
-            */
+            // Since this item is presumably already in the cart,
+            // we are not displaying an "Add to Cart" button.
+            // If needed, you could add a "Update Quantity" or "Remove from Cart" button.
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _QuantityButton({Key? key, required this.icon, required this.onPressed})
+      : super(key: key);
+
+  @override
+  State<_QuantityButton> createState() => _QuantityButtonState();
+}
+
+class _QuantityButtonState extends State<_QuantityButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = _hovering ? 1.1 : 1.0;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedScale(
+          scale: scale,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          child: CircleAvatar(
+            backgroundColor: Colors.black,
+            radius: 16,
+            child: Icon(
+              widget.icon,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
         ),
       ),
     );

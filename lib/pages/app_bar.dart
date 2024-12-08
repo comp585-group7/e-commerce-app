@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-// pages import
 import 'home_page.dart';
 import 'profile_page.dart';
 import 'shop_page.dart';
@@ -15,114 +14,188 @@ AppBar buildAppBar(BuildContext context) {
   return AppBar(
     backgroundColor: Colors.black,
     automaticallyImplyLeading: false,
-    title: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildFocusableButton(
-          label: 'StyleHive',
-          context: context,
-          onPressed: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => const HomePage()));
-          },
-        ),
-        Row(
-          children: [
-            _buildFocusableIconButton(
-              icon: Icons.search,
-              context: context,
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ShopPage(appBarBuilder: buildAppBar)),
-                );
-              },
-            ),
-            _buildFocusableIconButton(
-              icon: Icons.shopping_cart,
-              context: context,
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          CartPage(appBarBuilder: buildAppBar)),
-                );
-              },
-            ),
-            if (user != null)
-              _buildFocusableIconButton(
-                icon: Icons.person,
-                context: context,
+    titleSpacing: 0,
+    elevation: 0,
+    title: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          _AnimatedHoverTextButton(
+            label: 'StyleHive',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
+            },
+            hoverColor: Colors.deepOrangeAccent,
+            defaultColor: Colors.white,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              _AnimatedHoverIconButton(
+                icon: FontAwesomeIcons.search,
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          ProfilePage(appBarBuilder: buildAppBar),
+                          ShopPage(appBarBuilder: buildAppBar),
                     ),
                   );
                 },
-              )
-            else
-              _buildFocusableIconButton(
-                icon: Icons.login,
-                context: context,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
-                },
               ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-// Helper function for focusable TextButton
-Widget _buildFocusableButton({
-  required String label,
-  required BuildContext context,
-  required VoidCallback onPressed,
-}) {
-  return MouseRegion(
-    child: Focus(
-      child: TextButton(
-        onPressed: onPressed,
-        style: ButtonStyle(
-          foregroundColor: MaterialStateColor.resolveWith((states) {
-            if (states.contains(MaterialState.focused) ||
-                states.contains(MaterialState.hovered)) {
-              return Colors.deepOrangeAccent; // Highlighted color
-            }
-            return Colors.white; // Default color
-          }),
-        ),
-        child: Text(label),
+              const SizedBox(width: 8),
+              // Show cart icon only if user is logged in
+              if (user != null) ...[
+                _AnimatedHoverIconButton(
+                  icon: FontAwesomeIcons.shoppingCart,
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CartPage(appBarBuilder: buildAppBar),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                _AnimatedHoverIconButton(
+                  icon: FontAwesomeIcons.user,
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProfilePage(appBarBuilder: buildAppBar),
+                      ),
+                    );
+                  },
+                ),
+              ] else
+                // If user not logged in, show "Login" text button instead
+                _AnimatedHoverTextButton(
+                  label: 'Login',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
+                    );
+                  },
+                  hoverColor: Colors.deepOrangeAccent,
+                  defaultColor: Colors.white,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                        fontSize: 16.0,
+                      ),
+                ),
+            ],
+          ),
+        ],
       ),
     ),
   );
 }
 
-// Helper function for focusable IconButton
-Widget _buildFocusableIconButton({
-  required IconData icon,
-  required BuildContext context,
-  required VoidCallback onPressed,
-}) {
-  return MouseRegion(
-    child: Focus(
-      child: IconButton(
-        icon: Icon(icon),
-        onPressed: onPressed,
-        color: Colors.white,
-        iconSize: 24.0,
-        splashColor: Colors.blue,
+/// A text button that scales and changes color on hover for a modern look.
+class _AnimatedHoverTextButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final Color hoverColor;
+  final Color defaultColor;
+  final TextStyle? style;
+
+  const _AnimatedHoverTextButton({
+    Key? key,
+    required this.label,
+    required this.onPressed,
+    required this.hoverColor,
+    required this.defaultColor,
+    this.style,
+  }) : super(key: key);
+
+  @override
+  State<_AnimatedHoverTextButton> createState() =>
+      _AnimatedHoverTextButtonState();
+}
+
+class _AnimatedHoverTextButtonState extends State<_AnimatedHoverTextButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayColor = _hovering ? widget.hoverColor : widget.defaultColor;
+    final scale = _hovering ? 1.05 : 1.0;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedScale(
+          scale: scale,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          child: Text(
+            widget.label,
+            style: widget.style?.copyWith(color: displayColor) ??
+                TextStyle(color: displayColor),
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
+}
+
+/// An icon button that scales and subtly changes color on hover.
+class _AnimatedHoverIconButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _AnimatedHoverIconButton({
+    Key? key,
+    required this.icon,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  State<_AnimatedHoverIconButton> createState() =>
+      _AnimatedHoverIconButtonState();
+}
+
+class _AnimatedHoverIconButtonState extends State<_AnimatedHoverIconButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _hovering ? Colors.deepOrangeAccent : Colors.white;
+    final scale = _hovering ? 1.2 : 1.0;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedScale(
+          scale: scale,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          child: FaIcon(
+            widget.icon,
+            color: color,
+            size: 20,
+          ),
+        ),
+      ),
+    );
+  }
 }
