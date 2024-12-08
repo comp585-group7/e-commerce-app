@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'pages/home_page.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'pages/home_page.dart';
+import 'pages/success_page.dart'; // Import SuccessPage from separate file
+import 'pages/cancel_page.dart'; // Import CancelPage from separate file
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +31,12 @@ class StyleHiveApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
       ),
       debugShowCheckedModeBanner: false,
-      home: const HomePage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/success': (context) => const SuccessPage(),
+        '/cancel': (context) => const CancelPage(),
+      },
     );
   }
 }

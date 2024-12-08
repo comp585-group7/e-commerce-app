@@ -3,8 +3,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:url_launcher/url_launcher.dart'; // Added
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:html' as html; // Used for web navigation on web platform
 
+// Update this to your actual backend URL
 const String backendUrl = 'https://ecommerce-backend2-qqsc.onrender.com';
 
 class CheckoutPage extends StatefulWidget {
@@ -21,23 +23,43 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(
+        title: Text(
+          'Checkout',
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
+        ),
+        backgroundColor: Colors.black,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(
               'Total: \$${widget.totalAmount.toStringAsFixed(2)}',
-              style:
-                  const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+              ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 14.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () async {
                 await makePayment();
               },
-              child: const Text('Pay Now'),
+              child: Text(
+                'Pay Now',
+                style: textTheme.titleMedium?.copyWith(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -48,17 +70,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Future<void> makePayment() async {
     try {
       if (kIsWeb) {
-        // On web, Payment Sheet is not supported. Use Stripe Checkout instead.
+        // On Web, redirect to Stripe Checkout page
         final checkoutUrl = await createCheckoutSession(widget.totalAmount);
-        // Use url_launcher to open the checkoutUrl in a new tab or window
-        final uri = Uri.parse(checkoutUrl);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } else {
-          print("Could not launch $checkoutUrl");
-        }
+        html.window.location.href = checkoutUrl;
       } else {
-        // On mobile (iOS/Android), use Payment Sheet
+        // On Mobile or Desktop, use Payment Sheet
         paymentIntentData = await createPaymentIntent(
           widget.totalAmount.toString(),
           'usd',
@@ -74,7 +90,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         await displayPaymentSheet();
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error during payment: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Payment failed: $e')),
       );
@@ -92,7 +108,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         const SnackBar(content: Text('Payment cancelled')),
       );
     } catch (e) {
-      print('Error displaying payment sheet: $e');
+      debugPrint('Error displaying payment sheet: $e');
     }
   }
 

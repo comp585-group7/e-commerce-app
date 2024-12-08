@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // For date formatting
 import 'login_page.dart';
 import 'home_page.dart';
 
@@ -14,15 +16,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? user; // Nullable user to handle logged-out states.
+  User? user;
   bool isLoading = false;
+  List<Map<String, dynamic>> orders = [];
 
   @override
   void initState() {
     super.initState();
     user = _auth.currentUser;
 
-    // If user is not logged in, redirect to the LoginPage immediately.
     if (user == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
@@ -30,12 +32,50 @@ class _ProfilePageState extends State<ProfilePage> {
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       });
+    } else {
+      _loadOrders();
     }
+  }
+
+  Future<void> _loadOrders() async {
+    setState(() => isLoading = true);
+
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('userId', isEqualTo: user!.uid)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      final orderList = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'id': doc.id,
+          'items': data['items'] ?? [],
+          'totalAmount': data['totalAmount'] ?? 0.0,
+          'timestamp': data['timestamp'],
+        };
+      }).toList();
+
+      setState(() {
+        orders = orderList;
+      });
+    } catch (e) {
+      print('Error loading orders: $e');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  String _getUserName(String email) {
+    if (email.contains('@')) {
+      return email.split('@').first;
+    }
+    return email;
   }
 
   @override
   Widget build(BuildContext context) {
-    // If user is null (not logged in), return an empty widget.
     if (user == null) {
       return const SizedBox.shrink();
     }
@@ -52,133 +92,210 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Profile Header Card
-                  Card(
-                    color: Colors.blueGrey.shade50,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.orangeAccent,
-                            radius: 24.0,
-                            child: const Icon(
-                              Icons.person,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Hello, $userName",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 24.0,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Welcome back to your account",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _buildProfileHeader(userName, email),
                   const SizedBox(height: 20),
-
-                  // Personal Information Section
-                  _buildSectionHeader(context, "Personal Information",
-                      icon: Icons.info_outline),
-                  const SizedBox(height: 10),
-                  ListTile(
-                    leading: const Icon(Icons.email),
-                    title: Text(
-                      "Email: $email",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    subtitle: const Text("Tap to edit your email address"),
-                    trailing: const Icon(Icons.edit),
-                    onTap: () => _showEditEmailDialog(context),
-                  ),
-                  const Divider(height: 20, thickness: 1),
-
-                  // Account Settings Section
                   _buildSectionHeader(context, "Account Settings",
                       icon: Icons.settings),
                   const SizedBox(height: 10),
-                  ListTile(
-                    leading: const Icon(Icons.lock),
-                    title: const Text("Change Password"),
-                    trailing: const Icon(Icons.arrow_forward_ios),
+                  _buildSettingsOption(
+                    context,
+                    icon: Icons.email,
+                    title: "Email: $email",
+                    subtitle: "Tap to edit your email address",
+                    onTap: () => _showEditEmailDialog(context),
+                  ),
+                  _buildDivider(),
+                  _buildSettingsOption(
+                    context,
+                    icon: Icons.lock,
+                    title: "Change Password",
                     onTap: () => _showChangePasswordDialog(context),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.logout),
-                    title: const Text("Logout"),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () async {
-                      await _auth.signOut();
-                      if (mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomePage()),
-                        );
-                      }
-                    },
+                  _buildSettingsOption(
+                    context,
+                    icon: Icons.logout,
+                    title: "Logout",
+                    onTap: _handleLogout,
                   ),
+                  _buildDivider(),
+                  _buildSectionHeader(context, "Previous Orders",
+                      icon: Icons.history),
                   const SizedBox(height: 10),
+                  if (orders.isEmpty)
+                    _buildEmptyOrdersMessage()
+                  else
+                    _buildOrdersList(),
                 ],
               ),
             ),
     );
   }
 
-  // Extracts a user-friendly username from the email (just the part before '@')
-  String _getUserName(String email) {
-    if (email.contains('@')) {
-      return email.split('@').first;
-    }
-    return email;
-  }
-
-  // Builds a styled section header with an optional icon
-  Widget _buildSectionHeader(BuildContext context, String title,
-      {IconData? icon}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 20),
-            const SizedBox(width: 8),
+  Widget _buildProfileHeader(String userName, String email) {
+    return Card(
+      color: Colors.blueGrey.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.orangeAccent,
+              radius: 24.0,
+              child: const Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Hello, $userName",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24.0,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Welcome back to your account",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
           ],
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // Shows a dialog to edit the user's email address
+  Widget _buildSectionHeader(BuildContext context, String title,
+      {IconData? icon}) {
+    return Row(
+      children: [
+        if (icon != null) ...[
+          Icon(icon, size: 20, color: Colors.black87),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsOption(BuildContext context,
+      {required IconData icon,
+      required String title,
+      String? subtitle,
+      required VoidCallback onTap}) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.black87),
+      title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(height: 20, thickness: 1);
+  }
+
+  Widget _buildEmptyOrdersMessage() {
+    return const Center(
+      child: Text(
+        "You have no previous orders.",
+        style: TextStyle(fontSize: 16, color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildOrdersList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: orders.map((order) {
+        final total = order['totalAmount'] ?? 0.0;
+        final items = order['items'] as List<dynamic>;
+        final timestamp = order['timestamp'];
+        DateTime date = DateTime.now();
+        if (timestamp is Timestamp) {
+          date = timestamp.toDate();
+        }
+
+        // Format the date nicely
+        final formattedDate = DateFormat.yMMMd().add_jm().format(date);
+
+        return Card(
+          color: Colors.white, // White background
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.symmetric(
+              vertical: 8.0), // Even vertical spacing
+          child: Padding(
+            padding: const EdgeInsets.all(16.0), // Consistent padding
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Order ID: ${order['id']}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  "Date: $formattedDate",
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Total: \$${total.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Items:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: items.map((item) {
+                    final itemData = item as Map<String, dynamic>;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text(
+                        "${itemData['name']} x${itemData['quantity']} @ \$${itemData['price']}",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   void _showEditEmailDialog(BuildContext context) {
     final formKey = GlobalKey<FormState>();
     String newEmail = '';
@@ -229,7 +346,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: const Text('Save'),
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  Navigator.of(dialogContext).pop(); // Close dialog
+                  Navigator.of(dialogContext).pop();
                   await _updateEmail(newEmail, password);
                 }
               },
@@ -240,7 +357,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Updates the user's email, re-authenticating if necessary
   Future<void> _updateEmail(String newEmail, String password) async {
     setState(() => isLoading = true);
 
@@ -256,8 +372,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email updated successfully')),
-        );
+            const SnackBar(content: Text('Email updated successfully')));
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -286,7 +401,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Shows a dialog to change the user's password
   void _showChangePasswordDialog(BuildContext context) {
     final formKey = GlobalKey<FormState>();
     String newPassword = '';
@@ -336,7 +450,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: const Text('Change'),
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  Navigator.of(dialogContext).pop(); // Close dialog
+                  Navigator.of(dialogContext).pop();
                   await _changePassword(currentPassword, newPassword);
                 }
               },
@@ -347,7 +461,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Changes the user's password after re-authenticating
   Future<void> _changePassword(
       String currentPassword, String newPassword) async {
     setState(() => isLoading = true);
@@ -364,8 +477,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password changed successfully')),
-        );
+            const SnackBar(content: Text('Password changed successfully')));
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -389,6 +501,16 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } finally {
       if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    await _auth.signOut();
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     }
   }
 }
