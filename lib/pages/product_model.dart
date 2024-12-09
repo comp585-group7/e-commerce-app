@@ -46,7 +46,6 @@ class Product {
   }
 }
 
-// Define the Category class
 class Category {
   final String name;
   final String image;

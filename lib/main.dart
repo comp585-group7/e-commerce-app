@@ -3,8 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'pages/home_page.dart';
-import 'pages/success_page.dart'; // Import SuccessPage from separate file
-import 'pages/cancel_page.dart'; // Import CancelPage from separate file
+import 'pages/success_page.dart';
+import 'pages/cancel_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +12,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Set your Stripe publishable key directly:
+  // Set your Stripe publishable key:
   Stripe.publishableKey =
       'your-publishable-key-here'; // Replace with your actual key
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/intl.dart';
 import 'login_page.dart';
 import 'home_page.dart';
 
@@ -19,6 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   User? user;
   bool isLoading = false;
   List<Map<String, dynamic>> orders = [];
+  List<Map<String, dynamic>> userReviews = [];
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     } else {
       _loadOrders();
+      _loadUserReviews();
     }
   }
 
@@ -67,6 +69,58 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _loadUserReviews() async {
+    if (user == null) return;
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collectionGroup('reviews')
+          .where('userId', isEqualTo: user!.uid)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      final rawReviews = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'productId': doc.reference.parent.parent?.id ?? '',
+          'rating': data['rating'] ?? 0,
+          'comment': data['comment'] ?? '',
+          'timestamp': data['timestamp'],
+          'userEmail': data['userEmail'] ?? '',
+        };
+      }).toList();
+
+      // For each review, fetch the product's name
+      for (var review in rawReviews) {
+        final productId = review['productId'];
+        if (productId.isNotEmpty) {
+          try {
+            final productDoc = await FirebaseFirestore.instance
+                .collection('products')
+                .doc(productId)
+                .get();
+
+            final productName = (productDoc.exists && productDoc.data() != null)
+                ? (productDoc.data()!['name'] as String? ?? productId)
+                : productId;
+
+            review['productName'] = productName;
+          } catch (e) {
+            print('Error fetching product name for $productId: $e');
+            review['productName'] = review['productId']; // fallback
+          }
+        } else {
+          review['productName'] = 'Unknown Product';
+        }
+      }
+
+      setState(() {
+        userReviews = rawReviews;
+      });
+    } catch (e) {
+      print('Error loading user reviews: $e');
+    }
+  }
+
   String _getUserName(String email) {
     if (email.contains('@')) {
       return email.split('@').first;
@@ -97,27 +151,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildSectionHeader(context, "Account Settings",
                       icon: Icons.settings),
                   const SizedBox(height: 10),
-                  _buildSettingsOption(
-                    context,
-                    icon: Icons.email,
-                    title: "Email: $email",
-                    subtitle: "Tap to edit your email address",
+                  ListTile(
+                    leading: const Icon(Icons.email),
+                    title: Text("Email: $email",
+                        style: Theme.of(context).textTheme.bodyMedium),
+                    subtitle: const Text("Tap to edit your email address"),
+                    trailing: const Icon(Icons.edit),
                     onTap: () => _showEditEmailDialog(context),
                   ),
-                  _buildDivider(),
-                  _buildSettingsOption(
-                    context,
-                    icon: Icons.lock,
-                    title: "Change Password",
+                  ListTile(
+                    leading: const Icon(Icons.lock),
+                    title: const Text("Change Password"),
+                    subtitle: const Text("Tap to change your password"),
+                    trailing: const Icon(Icons.edit),
                     onTap: () => _showChangePasswordDialog(context),
                   ),
-                  _buildSettingsOption(
-                    context,
-                    icon: Icons.logout,
-                    title: "Logout",
-                    onTap: _handleLogout,
-                  ),
-                  _buildDivider(),
+                  const Divider(height: 20, thickness: 1),
                   _buildSectionHeader(context, "Previous Orders",
                       icon: Icons.history),
                   const SizedBox(height: 10),
@@ -125,6 +174,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     _buildEmptyOrdersMessage()
                   else
                     _buildOrdersList(),
+                  const SizedBox(height: 20),
+                  _buildSectionHeader(context, "Your Reviews",
+                      icon: Icons.rate_review),
+                  const SizedBox(height: 10),
+                  if (userReviews.isEmpty)
+                    const Text("You haven't left any reviews yet.",
+                        style: TextStyle(fontSize: 16, color: Colors.grey))
+                  else
+                    _buildUserReviewsList(),
                 ],
               ),
             ),
@@ -196,25 +254,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildSettingsOption(BuildContext context,
-      {required IconData icon,
-      required String title,
-      String? subtitle,
-      required VoidCallback onTap}) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.black87),
-      title: Text(title, style: Theme.of(context).textTheme.bodyMedium),
-      subtitle: subtitle != null ? Text(subtitle) : null,
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-    );
-  }
-
-  Widget _buildDivider() {
-    return const Divider(height: 20, thickness: 1);
-  }
-
   Widget _buildEmptyOrdersMessage() {
     return const Center(
       child: Text(
@@ -236,7 +275,6 @@ class _ProfilePageState extends State<ProfilePage> {
           date = timestamp.toDate();
         }
 
-        // Format the date nicely
         final formattedDate = DateFormat.yMMMd().add_jm().format(date);
 
         return Card(
@@ -245,10 +283,9 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          margin: const EdgeInsets.symmetric(
-              vertical: 8.0), // Even vertical spacing
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // Consistent padding
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -287,6 +324,66 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     );
                   }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildUserReviewsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: userReviews.map((r) {
+        final rating = r['rating'] ?? 0;
+        final comment = r['comment'] ?? '';
+        final productName = r['productName'] ?? r['productId'];
+        final timestamp = r['timestamp'];
+        DateTime date = DateTime.now();
+        if (timestamp is Timestamp) {
+          date = timestamp.toDate();
+        }
+        final formattedDate = DateFormat.yMMMd().add_jm().format(date);
+
+        return Card(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: List.generate(5, (index) {
+                    final starIndex = index + 1;
+                    return Icon(
+                      starIndex <= rating ? Icons.star : Icons.star_border,
+                      color: starIndex <= rating ? Colors.yellow : Colors.grey,
+                      size: 16,
+                    );
+                  }),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Product: $productName",
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(comment, style: const TextStyle(fontSize: 14)),
+                      const SizedBox(height: 4),
+                      Text("Date: $formattedDate",
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 12)),
+                    ],
+                  ),
                 ),
               ],
             ),

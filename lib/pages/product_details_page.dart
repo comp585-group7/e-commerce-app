@@ -22,12 +22,50 @@ class ProductDetailsPage extends StatefulWidget {
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int quantity = 1;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? user; // Make user nullable
+  User? user;
+
+  // Review fields
+  int _selectedRating = 5;
+  final TextEditingController _reviewController = TextEditingController();
+  List<Map<String, dynamic>> reviews = [];
+  bool isLoadingReviews = true;
 
   @override
   void initState() {
     super.initState();
-    user = _auth.currentUser; // Assign current user
+    user = _auth.currentUser;
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(widget.product.id.toString())
+          .collection('reviews')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      final reviewList = querySnapshot.docs.map((d) {
+        return {
+          'userId': d.data()['userId'],
+          'rating': d.data()['rating'],
+          'comment': d.data()['comment'],
+          'timestamp': d.data()['timestamp'],
+          'userEmail': d.data()['userEmail'] ?? '',
+        };
+      }).toList();
+
+      setState(() {
+        reviews = reviewList;
+        isLoadingReviews = false;
+      });
+    } catch (e) {
+      print('Error loading reviews: $e');
+      setState(() {
+        isLoadingReviews = false;
+      });
+    }
   }
 
   Future<void> _addToCart(BuildContext context) async {
@@ -51,7 +89,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Product already exists in the cart, update its quantity
+        // Update quantity
         final docRef = querySnapshot.docs.first.reference;
         final currentData = querySnapshot.docs.first.data();
         final currentQuantity = currentData['quantity'] ?? 1;
@@ -60,7 +98,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         await docRef.update({'quantity': newQuantity});
         _showAddToCartDialog(context, 'Quantity updated in cart');
       } else {
-        // Product not in cart, add a new entry
+        // Add new cart entry
         await cartCollection.add({
           'userId': user!.uid,
           'productId': widget.product.id,
@@ -69,6 +107,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           'image': widget.product.image,
           'quantity': quantity,
           'description': widget.product.description,
+          'category': widget.product.category,
         });
 
         _showAddToCartDialog(context, 'Item added to cart');
@@ -102,7 +141,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context); // Close
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -117,7 +156,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context); // Close
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -136,23 +175,69 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
   }
 
+  Future<void> _submitReview() async {
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('You must be logged in to leave a review')),
+      );
+      return;
+    }
+
+    final comment = _reviewController.text.trim();
+    if (_selectedRating < 1 || _selectedRating > 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select a rating between 1 and 5')),
+      );
+      return;
+    }
+    if (comment.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a comment')),
+      );
+      return;
+    }
+
+    try {
+      final productRef = FirebaseFirestore.instance
+          .collection('products')
+          .doc(widget.product.id.toString());
+
+      final reviewRef = productRef.collection('reviews').doc();
+
+      await reviewRef.set({
+        'userId': user!.uid,
+        'rating': _selectedRating,
+        'comment': comment,
+        'timestamp': FieldValue.serverTimestamp(),
+        'userEmail': user!.email ?? '',
+      });
+
+      _reviewController.clear();
+      setState(() {
+        _selectedRating = 5;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Review added')),
+      );
+
+      // Reload reviews
+      _loadReviews();
+    } catch (e) {
+      print('Error adding review: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to add review')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
     final priceText = '\$${product.price.toStringAsFixed(2)}';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Product Details',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-        ),
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: buildAppBar(context),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
@@ -269,6 +354,124 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       ),
                 ),
               ),
+
+              const SizedBox(height: 40),
+
+              // Display Reviews
+              Text(
+                'Reviews',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 10),
+              if (isLoadingReviews)
+                const Center(child: CircularProgressIndicator())
+              else if (reviews.isEmpty)
+                const Text('No reviews yet.')
+              else
+                Column(
+                  children: reviews.map((r) {
+                    final rating = r['rating'] ?? 0;
+                    final comment = r['comment'] ?? '';
+                    final email = r['userEmail'] ?? '';
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            children: List.generate(5, (index) {
+                              final starIndex = index + 1;
+                              return Icon(
+                                starIndex <= rating
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                color: starIndex <= rating
+                                    ? Colors.yellow
+                                    : Colors.grey,
+                                size: 16,
+                              );
+                            }),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(email,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  comment,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+              const SizedBox(height: 20),
+
+              if (user != null) ...[
+                Text(
+                  'Leave a Review',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: List.generate(5, (index) {
+                    final starIndex = index + 1;
+                    return IconButton(
+                      icon: Icon(
+                        starIndex <= _selectedRating
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: starIndex <= _selectedRating
+                            ? Colors.yellow
+                            : Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _selectedRating = starIndex;
+                        });
+                      },
+                    );
+                  }),
+                ),
+                TextField(
+                  controller: _reviewController,
+                  decoration: const InputDecoration(
+                    labelText: 'Comment',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _submitReview,
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  child: const Text(
+                    'Submit Review',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -277,7 +480,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   }
 }
 
-/// A small widget for quantity buttons (plus and minus)
 class _QuantityButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onPressed;
