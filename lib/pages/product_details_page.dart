@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
+import 'home_page.dart';
+import 'product_model.dart';
 import 'cart_page.dart';
 import 'app_bar.dart';
 import 'shop_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'login_page.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
@@ -81,7 +82,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     try {
       final cartCollection = FirebaseFirestore.instance.collection('cart');
 
-      // Check if the product is already in the user's cart
+      // Check if product is already in the user's cart
       final querySnapshot = await cartCollection
           .where('userId', isEqualTo: user!.uid)
           .where('productId', isEqualTo: widget.product.id)
@@ -240,7 +241,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       appBar: buildAppBar(context),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          // Remove horizontal padding so the reviews can take full width
+          padding: const EdgeInsets.only(top: 24.0, bottom: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -262,39 +264,43 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               const SizedBox(height: 30),
 
               // Product Info Card
-              Card(
-                color: Colors.white,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        product.name,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        priceText,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        product.description,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  color: Colors.white,
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          product.name,
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          priceText,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.deepOrangeAccent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          product.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -304,13 +310,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               // Quantity Selector
               Text(
                 'Quantity',
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
               ),
               const SizedBox(height: 10),
+              // Centering the quantity controls
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _QuantityButton(
                     icon: Icons.remove,
@@ -338,20 +346,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               const SizedBox(height: 40),
 
               // Add to Cart Button
-              ElevatedButton(
-                onPressed: () => _addToCart(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0)),
-                ),
-                child: Text(
-                  'Add to Cart',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: ElevatedButton(
+                  onPressed: () => _addToCart(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0)),
+                  ),
+                  child: Text(
+                    'Add to Cart',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
                 ),
               ),
 
@@ -360,6 +371,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               // Display Reviews
               Text(
                 'Reviews',
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -368,24 +380,38 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               if (isLoadingReviews)
                 const Center(child: CircularProgressIndicator())
               else if (reviews.isEmpty)
-                const Text('No reviews yet.')
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text('No reviews yet.'),
+                )
               else
+                // Reviews full width, left aligned
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: reviews.map((r) {
                     final rating = r['rating'] ?? 0;
                     final comment = r['comment'] ?? '';
                     final email = r['userEmail'] ?? '';
                     return Container(
+                      width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Row(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
+                          Text(
+                            email,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          const SizedBox(height: 4),
+                          // Horizontal stars under username
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: List.generate(5, (index) {
                               final starIndex = index + 1;
                               return Icon(
@@ -393,29 +419,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                     ? Icons.star
                                     : Icons.star_border,
                                 color: starIndex <= rating
-                                    ? Colors.yellow
+                                    ? Colors.deepOrangeAccent
                                     : Colors.grey,
                                 size: 16,
                               );
                             }),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(email,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14)),
-                                const SizedBox(height: 4),
-                                Text(
-                                  comment,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          )
+                          const SizedBox(height: 4),
+                          Text(
+                            comment,
+                            style: const TextStyle(fontSize: 14),
+                          ),
                         ],
                       ),
                     );
@@ -427,13 +441,14 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               if (user != null) ...[
                 Text(
                   'Leave a Review',
+                  textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 10),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {
                     final starIndex = index + 1;
                     return IconButton(
@@ -442,7 +457,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             ? Icons.star
                             : Icons.star_border,
                         color: starIndex <= _selectedRating
-                            ? Colors.yellow
+                            ? Colors.deepOrangeAccent
                             : Colors.grey,
                       ),
                       onPressed: () {
@@ -453,22 +468,28 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     );
                   }),
                 ),
-                TextField(
-                  controller: _reviewController,
-                  decoration: const InputDecoration(
-                    labelText: 'Comment',
-                    border: OutlineInputBorder(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextField(
+                    controller: _reviewController,
+                    decoration: const InputDecoration(
+                      labelText: 'Comment',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
                   ),
-                  maxLines: 3,
                 ),
                 const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _submitReview,
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.black),
-                  child: const Text(
-                    'Submit Review',
-                    style: TextStyle(color: Colors.white),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ElevatedButton(
+                    onPressed: _submitReview,
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                    child: const Text(
+                      'Submit Review',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ],

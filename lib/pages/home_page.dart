@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   void _scrollRight() {
     _scrollController.animateTo(
-      _scrollController.offset + 300,
+      _scrollController.offset + 500, // Increased scroll amount
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
 
   void _scrollLeft() {
     _scrollController.animateTo(
-      _scrollController.offset - 300,
+      _scrollController.offset - 500, // Increased scroll amount
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
@@ -67,54 +67,45 @@ class _HomePageState extends State<HomePage> {
       },
       child: _AnimatedHoverContainer(
         width: cardWidth,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey.shade300, width: 1.0),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(8.0)),
-                  child: Image.network(
-                    product.image,
-                    fit: BoxFit.contain,
-                    width: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.error, size: 40);
-                    },
+        height: 220, // Reduced height so no overflow on hover
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(8.0)),
+                child: Image.network(
+                  product.image,
+                  fit: BoxFit.contain,
+                  width: double.infinity,
+                  height: 120,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error, size: 40);
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              product.name,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-                child: Column(
-                  children: [
-                    Text(
-                      product.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.deepOrangeAccent,
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              '\$${product.price.toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.deepOrangeAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );
@@ -167,8 +158,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFeaturedProductsSection(double cardHeight, double cardWidth) {
-    // Limit to 4 items for display
-    int displayCount = math.min(products.length, 4);
+    // Limit the carousel to 5 items total
+    int displayCount = math.min(products.length, 5);
 
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),
@@ -199,7 +190,7 @@ class _HomePageState extends State<HomePage> {
                       child: ListView.builder(
                         controller: _scrollController,
                         scrollDirection: Axis.horizontal,
-                        itemCount: displayCount, // Show up to 4 items
+                        itemCount: displayCount,
                         itemBuilder: (context, index) {
                           var product = products[index];
                           return Padding(
@@ -212,9 +203,9 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 50),
                   ],
                 ),
-                // Left arrow button
+                // Left arrow button with some horizontal padding from the screen edge
                 Positioned(
-                  left: 0,
+                  left: 16,
                   top: cardHeight / 2 - 25,
                   child: FloatingActionButton(
                     backgroundColor: Colors.black,
@@ -223,9 +214,9 @@ class _HomePageState extends State<HomePage> {
                     child: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
                 ),
-                // Right arrow button
+                // Right arrow button with some horizontal padding from the screen edge
                 Positioned(
-                  right: 0,
+                  right: 16,
                   top: cardHeight / 2 - 25,
                   child: FloatingActionButton(
                     backgroundColor: Colors.black,
@@ -396,9 +387,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-    // Increase cardWidth so fewer items fit, forcing scroll
     double cardHeight = math.min(screenHeight * 0.4, 400);
-    double cardWidth = math.min(screenWidth * 0.6, 500);
+    // cardWidth so that exactly 2 items visible + spacing and margins
+    double cardWidth = (screenWidth - 116) / 2;
 
     return Scaffold(
       appBar: buildAppBar(context),
@@ -443,7 +434,8 @@ class _AnimatedHoverContainerState extends State<_AnimatedHoverContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final scale = _hovering ? 1.02 : 1.0;
+    final borderColor =
+        _hovering ? Colors.deepOrangeAccent : Colors.transparent;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
@@ -451,15 +443,17 @@ class _AnimatedHoverContainerState extends State<_AnimatedHoverContainer> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
-        child: AnimatedScale(
-          scale: scale,
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeInOut,
-          child: SizedBox(
-            width: widget.width,
-            height: widget.height,
-            child: widget.child,
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor, width: 2.0),
+            borderRadius: BorderRadius.circular(8.0),
+            color: Colors.white,
           ),
+          child: widget.child,
         ),
       ),
     );

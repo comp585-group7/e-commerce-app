@@ -166,7 +166,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     trailing: const Icon(Icons.edit),
                     onTap: () => _showChangePasswordDialog(context),
                   ),
-                  // Logout button added here
                   ListTile(
                     leading: const Icon(Icons.logout),
                     title: const Text("Logout"),
@@ -376,7 +375,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     final starIndex = index + 1;
                     return Icon(
                       starIndex <= rating ? Icons.star : Icons.star_border,
-                      color: starIndex <= rating ? Colors.yellow : Colors.grey,
+                      color: starIndex <= rating
+                          ? Colors.deepOrangeAccent
+                          : Colors.grey,
                       size: 16,
                     );
                   }),
@@ -402,54 +403,75 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Edit Email'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  initialValue: user!.email,
-                  decoration: const InputDecoration(labelText: 'New Email'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an email';
-                    } else if (!RegExp(
-                            r'^([a-zA-Z0-9_\.\-])+\@([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9]{2,4})+$')
-                        .hasMatch(value)) {
-                      return 'Enter a valid email';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) => newEmail = value,
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? 'Enter your password to confirm'
-                      : null,
-                  onChanged: (value) => password = value,
-                ),
-              ],
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            dialogBackgroundColor: Colors.black,
+            textTheme:
+                ThemeData.dark().textTheme.apply(bodyColor: Colors.white),
+            inputDecorationTheme: const InputDecorationTheme(
+              labelStyle: TextStyle(color: Colors.white),
+              border: OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
             ),
           ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(dialogContext).pop(),
+          child: AlertDialog(
+            title:
+                const Text('Edit Email', style: TextStyle(color: Colors.white)),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    initialValue: user!.email,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(labelText: 'New Email'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an email';
+                      } else if (!RegExp(
+                              r'^([a-zA-Z0-9_\.\-])+\@([a-zA-Z0-9\-]+\.)+([a-zA-Z0-9]{2,4})+$')
+                          .hasMatch(value)) {
+                        return 'Enter a valid email';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) => newEmail = value,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Enter your password to confirm'
+                        : null,
+                    onChanged: (value) => password = value,
+                  ),
+                ],
+              ),
             ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  Navigator.of(dialogContext).pop();
-                  await _updateEmail(newEmail, password);
-                }
-              },
-            ),
-          ],
+            actions: [
+              TextButton(
+                child:
+                    const Text('Cancel', style: TextStyle(color: Colors.white)),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+              TextButton(
+                child:
+                    const Text('Save', style: TextStyle(color: Colors.white)),
+                onPressed: () async {
+                  if (formKey.currentState!.validate()) {
+                    Navigator.of(dialogContext).pop();
+                    await _updateEmail(newEmail, password);
+                  }
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -507,53 +529,75 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Change Password'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Current Password'),
-                  obscureText: true,
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? 'Please enter your current password'
-                      : null,
-                  onChanged: (value) => currentPassword = value,
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'New Password'),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a new password';
-                    } else if (value.length < 6) {
-                      return 'Password should be at least 6 characters';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) => newPassword = value,
-                ),
-              ],
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            dialogBackgroundColor: Colors.black,
+            textTheme:
+                ThemeData.dark().textTheme.apply(bodyColor: Colors.white),
+            inputDecorationTheme: const InputDecorationTheme(
+              labelStyle: TextStyle(color: Colors.white),
+              border: OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white)),
             ),
           ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(dialogContext).pop(),
+          child: AlertDialog(
+            title: const Text('Change Password',
+                style: TextStyle(color: Colors.white)),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration:
+                        const InputDecoration(labelText: 'Current Password'),
+                    obscureText: true,
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Please enter your current password'
+                        : null,
+                    onChanged: (value) => currentPassword = value,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration:
+                        const InputDecoration(labelText: 'New Password'),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a new password';
+                      } else if (value.length < 6) {
+                        return 'Password should be at least 6 characters';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) => newPassword = value,
+                  ),
+                ],
+              ),
             ),
-            TextButton(
-              child: const Text('Change'),
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  Navigator.of(dialogContext).pop();
-                  await _changePassword(currentPassword, newPassword);
-                }
-              },
-            ),
-          ],
+            actions: [
+              TextButton(
+                child:
+                    const Text('Cancel', style: TextStyle(color: Colors.white)),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+              TextButton(
+                child:
+                    const Text('Change', style: TextStyle(color: Colors.white)),
+                onPressed: () async {
+                  if (formKey.currentState!.validate()) {
+                    Navigator.of(dialogContext).pop();
+                    await _changePassword(currentPassword, newPassword);
+                  }
+                },
+              ),
+            ],
+          ),
         );
       },
     );
