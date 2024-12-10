@@ -373,7 +373,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 30),
           Text(
-            '© ${DateTime.now().year} StyleHive. All rights reserved.',
+            '© ${DateTime.now().year} StyleHiveee. All rights reserved.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.white54,
                 ),
