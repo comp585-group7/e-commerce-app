@@ -227,7 +227,7 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.redAccent),
+              icon: const Icon(Icons.delete, color: Colors.deepOrangeAccent),
               onPressed: () {
                 onRemove(item.id);
               },

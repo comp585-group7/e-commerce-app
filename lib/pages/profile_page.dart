@@ -191,7 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildProfileHeader(String userName, String email) {
     return Card(
-      color: Colors.blueGrey.shade50,
+      color: const Color.fromARGB(255, 255, 255, 255),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -201,7 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.orangeAccent,
+              backgroundColor: Colors.deepOrangeAccent,
               radius: 24.0,
               child: const Icon(
                 Icons.person,
@@ -278,7 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
         final formattedDate = DateFormat.yMMMd().add_jm().format(date);
 
         return Card(
-          color: Colors.white, // White background
+          color: Colors.white,
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -356,10 +356,18 @@ class _ProfilePageState extends State<ProfilePage> {
           margin: const EdgeInsets.symmetric(vertical: 8.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
+                // Product title and stars horizontally under it
+                Text("Product: $productName",
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+
+                const SizedBox(height: 8),
+
+                // Row of stars horizontally
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: List.generate(5, (index) {
                     final starIndex = index + 1;
                     return Icon(
@@ -369,22 +377,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   }),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Product: $productName",
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Text(comment, style: const TextStyle(fontSize: 14)),
-                      const SizedBox(height: 4),
-                      Text("Date: $formattedDate",
-                          style: const TextStyle(
-                              color: Colors.grey, fontSize: 12)),
-                    ],
-                  ),
-                ),
+
+                const SizedBox(height: 8),
+                Text(comment, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 4),
+                Text("Date: $formattedDate",
+                    style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ],
             ),
           ),
