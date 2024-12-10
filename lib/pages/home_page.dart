@@ -158,8 +158,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFeaturedProductsSection(double cardHeight, double cardWidth) {
-    // Limit the carousel to 5 items total
-    int displayCount = math.min(products.length, 5);
+    // Limit the carousel to 4 items total
+    int displayCount = math.min(products.length, 4);
 
     return Padding(
       padding: const EdgeInsets.only(top: 40.0),

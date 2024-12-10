@@ -244,17 +244,27 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildSectionHeader(BuildContext context, String title,
       {IconData? icon}) {
+    // Check if the title is one of the three specified
+    bool specialTitle = (title == "Account Settings" ||
+        title == "Previous Orders" ||
+        title == "Your Reviews");
+
+    final textColor = specialTitle ? Colors.deepOrangeAccent : Colors.black87;
+    final iconColor = specialTitle ? Colors.deepOrangeAccent : Colors.black87;
+    final fontSize = specialTitle ? 22.0 : 18.0; // Increased font size
+
     return Row(
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 20, color: Colors.black87),
+          Icon(icon, size: 20, color: iconColor),
           const SizedBox(width: 8),
         ],
         Text(
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 18.0,
+                fontSize: fontSize,
+                color: textColor,
               ),
         ),
       ],
