@@ -1,109 +1,47 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:layout_basics1/pages/shop_page.dart';
-import 'dart:convert';
-import 'dart:io' show Platform;
-
-import 'product_details_page.dart'; // Import ProductDetailsPage
-import 'app_bar.dart'; // Import buildAppBar function
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'product_details_page.dart';
+import 'app_bar.dart';
+import 'product_model.dart';
+import 'shop_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:http/http.dart' as http;
+import 'dart:math' as math;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
-
-  List<dynamic> products = [];
-  List<dynamic> categories = [];
-  // ignore: non_constant_identifier_names
-  String mapping_string =
-      'http://localhost:5000'; // the web mapping string is by default
+  List<Product> products = [];
 
   @override
   void initState() {
     super.initState();
-
-    if (isAndroid()) {
-      mapping_string = 'http://10.0.2.2:5000';
-    }
-
     _loadProductData();
-    _loadCatalogData();
   }
 
-  // Checks for the platform if its on Android
-  bool isAndroid() {
-    if (kIsWeb) {
-      return false;
-    } else {
-      return Platform.isAndroid;
-    }
-  }
-
-  // Load product data from JSON
   Future<void> _loadProductData() async {
-    final response =
-        await http.get(Uri.parse('$mapping_string/api/products/featured'));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      setState(() {
-        products = data['products'];
-      });
-    } else {
-      throw Exception('Failed to load products');
-    }
-  }
-
-  // Load category data from JSON
-  Future<void> _loadCatalogData() async {
-    // Catalog == Category
     try {
-      // Perform the GET request to fetch catalog data from the API
-      final response =
-          await http.get(Uri.parse('$mapping_string/api/products/catalog'));
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('products').get();
+      List<Product> productList =
+          querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
 
-      if (response.statusCode == 200) {
-        // Parse the JSON response
-        final data = json.decode(response.body);
-        setState(() {
-          categories = data[
-              'categories']; // Assuming the API response has a 'categories' key
-        });
-      } else {
-        // Handle non-200 status codes
-        throw Exception('Failed to load catalog data: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Fallback: Load data from a local JSON file if API fails
-      try {
-        final String fallbackResponse =
-            await rootBundle.loadString('assets/data-ctlg.json');
-        final fallbackData = json.decode(fallbackResponse);
-        setState(() {
-          categories = fallbackData['categories'];
-        });
-      } catch (fallbackError) {
-        // Log or rethrow if fallback also fails
-        print('Error loading fallback catalog data: $fallbackError');
-        throw Exception('Failed to load catalog data from API and fallback.');
-      }
+      setState(() {
+        products = productList;
+      });
+    } catch (e) {
+      print('Error loading products: $e');
     }
   }
 
   void _scrollRight() {
     _scrollController.animateTo(
-      _scrollController.offset + 300,
+      _scrollController.offset + 500, // Increased scroll amount
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
@@ -111,51 +49,336 @@ class _HomePageState extends State<HomePage> {
 
   void _scrollLeft() {
     _scrollController.animateTo(
-      _scrollController.offset - 300,
+      _scrollController.offset - 500, // Increased scroll amount
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
   }
 
-  Widget _buildCategoryCard(String category, String imageAsset) {
+  Widget _buildProductCard(Product product, double cardWidth) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ShopPage(
-                      appBarBuilder: buildAppBar,
-                      category: category,
-                    )));
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailsPage(product: product),
+          ),
+        );
       },
-      child: Card(
-        color: Colors.white,
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
+      child: _AnimatedHoverContainer(
+        width: cardWidth,
+        height: 220, // Reduced height so no overflow on hover
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(8.0)),
+                child: Image.network(
+                  product.image,
+                  fit: BoxFit.contain,
+                  width: double.infinity,
+                  height: 120,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error, size: 40);
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              product.name,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              '\$${product.price.toStringAsFixed(2)}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.deepOrangeAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroSection() {
+    return Container(
+      width: double.infinity,
+      height: 250.0,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.network(
+            'https://i.ibb.co/QJHkQW0/orange.png',
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.error);
+            },
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'StyleHive',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 50.0,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '“A streetwear brand”',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white70,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 25.0,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturedProductsSection(double cardHeight, double cardWidth) {
+    // Limit the carousel to 4 items total
+    int displayCount = math.min(products.length, 4);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 40.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Center(
+              child: Text(
+                'Shop Latest Apparel',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrangeAccent,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: cardHeight,
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 50),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: displayCount,
+                        itemBuilder: (context, index) {
+                          var product = products[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: _buildProductCard(product, cardWidth),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 50),
+                  ],
+                ),
+                // Left arrow button with some horizontal padding from the screen edge
+                Positioned(
+                  left: 16,
+                  top: cardHeight / 2 - 25,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.black,
+                    mini: true,
+                    onPressed: _scrollLeft,
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
+                ),
+                // Right arrow button with some horizontal padding from the screen edge
+                Positioned(
+                  right: 16,
+                  top: cardHeight / 2 - 25,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.black,
+                    mini: true,
+                    onPressed: _scrollRight,
+                    child: const Icon(Icons.arrow_forward, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBrandStorySection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          Text(
+            'Our Story',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrangeAccent,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Text(
+              'Founded with a vision to revolutionize fashion, StyleHive brings you carefully curated apparel that blends style, sustainability, and affordability. Our team of designers and trend-setters scour the globe to bring you the latest collections, ensuring that you always look and feel your best.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 16.0,
+                    height: 1.5,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 40),
+          Image.network(
+            'https://i.ibb.co/BwtswSr/street-Wear.jpg',
+            fit: BoxFit.fitWidth,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.error, size: 40);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialsSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'What Our Customers Say',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrangeAccent,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          _buildTestimonialCard(
+            '“I love the variety and quality of clothes at StyleHive. I always find something new and exciting!”',
+            '– Sarah K.',
+          ),
+          const SizedBox(height: 30),
+          _buildTestimonialCard(
+            '“The customer service is top-notch, and their sustainable approach makes me feel good about my purchases.”',
+            '– James P.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialCard(String quote, String author) {
+    return Card(
+      elevation: 3,
+      color: Colors.white,
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              quote,
+              style: const TextStyle(
+                fontStyle: FontStyle.italic,
+                fontSize: 16.0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              author,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14.0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Container(
+      color: Colors.grey[900],
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Contact Us',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 20),
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(width: 15),
-              Image.network(
-                imageAsset,
-                width: 30,
-                height: 30,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons
-                      .error); // Show an error icon in case image fails to load
-                },
-              ),
-              const SizedBox(width: 10),
-              TextButton(
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.facebook,
+                    color: Colors.white),
                 onPressed: () {},
-                child: Text(category,
-                    style: TextStyle(fontSize: 16.0, color: Colors.black)),
+              ),
+              IconButton(
+                icon:
+                    const FaIcon(FontAwesomeIcons.twitter, color: Colors.white),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: const FaIcon(FontAwesomeIcons.instagram,
+                    color: Colors.white),
+                onPressed: () {},
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 30),
+          Text(
+            '© ${DateTime.now().year} StyleHive. All rights reserved.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white54,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -164,11 +387,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-
-    double cardHeight = screenHeight * 0.4;
-    double cardWidth = screenWidth * 0.45;
-
-    var isSmallScreen = screenWidth < 750;
+    double cardHeight = math.min(screenHeight * 0.4, 400);
+    // cardWidth so that exactly 2 items visible + spacing and margins
+    double cardWidth = (screenWidth - 116) / 2;
 
     return Scaffold(
       appBar: buildAppBar(context),
@@ -176,229 +397,65 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              height: 250.0,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                      'https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Shop Latest Apparel',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              height: cardHeight,
-              child: Stack(
-                children: [
-                  Row(
-                    children: [
-                      const SizedBox(width: 50),
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            var product = products[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProductDetailsPage(
-                                      productName: product['name'],
-                                      productDescription:
-                                          product['description'],
-                                      productImage: product['image'],
-                                      productPrice: product['price'],
-                                      productId: product['id'],
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0),
-                                child: Container(
-                                  width: cardWidth,
-                                  child: Column(
-                                    children: [
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: Image.network(
-                                            product['image'],
-                                            fit: BoxFit.contain,
-                                            width: double.infinity,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const Icon(Icons
-                                                  .error); // Show an error icon in case image fails to load
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              product['name'],
-                                              style: const TextStyle(
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              '\$${product['price']}',
-                                              style: const TextStyle(
-                                                fontSize: 14.0,
-                                                color: Colors.green,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 50),
-                    ],
-                  ),
-                  Positioned(
-                    left: 0,
-                    top: cardHeight / 2 - 25,
-                    child: FloatingActionButton(
-                      backgroundColor: Colors.black,
-                      mini: true,
-                      onPressed: _scrollLeft,
-                      child: const Icon(Icons.arrow_back, color: Colors.white),
-                    ),
-                  ),
-                  Positioned(
-                    right: 0,
-                    top: cardHeight / 2 - 25,
-                    child: FloatingActionButton(
-                      backgroundColor: Colors.black,
-                      mini: true,
-                      onPressed: _scrollRight,
-                      child:
-                          const Icon(Icons.arrow_forward, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Shop by Category',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: isSmallScreen ? 2.5 : 6.5,
-                //children: List.generate(categories.length - 12, (index) {
-                children: List.generate(4, (index) {
-                  var category = categories[index];
-                  return _buildCategoryCard(
-                      category['name'], category['image']);
-                }),
-              ),
-            ),
+            _buildHeroSection(),
+            _buildFeaturedProductsSection(cardHeight, cardWidth),
+            _buildBrandStorySection(),
+            _buildTestimonialsSection(),
             const SizedBox(height: 40),
-            Container(
-              color: Colors.grey[900],
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'About Us',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'StyleHiveeeeeee is your go-to destination for the latest trends in fashion. We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16.0,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Contact Us',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.facebook,
-                            color: Colors.white),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.twitter,
-                            color: Colors.white),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const FaIcon(FontAwesomeIcons.instagram,
-                            color: Colors.white),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            _buildFooter(),
           ],
         ),
       ),
     );
   }
 }
-// End of Main Landing Page class
+
+class _AnimatedHoverContainer extends StatefulWidget {
+  final Widget child;
+  final double? width;
+  final double? height;
+  final VoidCallback? onTap;
+
+  const _AnimatedHoverContainer({
+    Key? key,
+    required this.child,
+    this.onTap,
+    this.width,
+    this.height,
+  }) : super(key: key);
+
+  @override
+  State<_AnimatedHoverContainer> createState() =>
+      _AnimatedHoverContainerState();
+}
+
+class _AnimatedHoverContainerState extends State<_AnimatedHoverContainer> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor =
+        _hovering ? Colors.deepOrangeAccent : Colors.transparent;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor, width: 2.0),
+            borderRadius: BorderRadius.circular(8.0),
+            color: Colors.white,
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}

@@ -1,9 +1,21 @@
-// ignore: unused_import
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart'; // basic flutter package
-import 'pages/home_page.dart'; // Import HomePage
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'pages/home_page.dart';
+import 'pages/success_page.dart';
+import 'pages/cancel_page.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Set your Stripe publishable key:
+  Stripe.publishableKey =
+      'your-publishable-key-here'; // Replace with your actual key
+
   runApp(const StyleHiveApp());
 }
 
@@ -13,15 +25,18 @@ class StyleHiveApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'StyleHive',
       theme: ThemeData(
         primaryColor: Colors.black,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const HomePage(), // Use HomePage from home_page.dart
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/success': (context) => const SuccessPage(),
+        '/cancel': (context) => const CancelPage(),
+      },
     );
   }
 }
-
-/// End of document

@@ -1,240 +1,168 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:focusable_control_builder/focusable_control_builder.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
+import 'product_details_page.dart';
+import 'product_model.dart';
+import 'app_bar.dart';
 
-import 'product_details_page.dart'; // Import ProductDetailsPage
-
-/// Shop Page
-/// This page would show all the items being sold
-/// can we add a way to use focusable_control_builder.dart so that the shop cards are higlighted with black when hovered on
 class ShopPage extends StatefulWidget {
   final AppBar Function(BuildContext) appBarBuilder;
   final String? category;
 
-  const ShopPage({super.key, required this.appBarBuilder, this.category});
+  const ShopPage({Key? key, required this.appBarBuilder, this.category})
+      : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _ShopPageState createState() => _ShopPageState();
 }
 
 class _ShopPageState extends State<ShopPage> {
-  final ScrollController _scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
 
-  List<dynamic> products = [];
-  List<dynamic> searchResults = [];
-  List<dynamic> categories = [];
-  // ignore: non_constant_identifier_names
-  String mapping_string = 'http://localhost:5000'; // default is web
+  List<Product> products = [];
+  List<Product> searchResults = [];
+  List<Category> categories = [];
+  bool isLoading = true;
+
+  // A set of selected categories from the filter panel
+  Set<String> selectedCategories = {};
 
   @override
   void initState() {
     super.initState();
-
-    // Checks if the device is android or not
-    if (isAndroid()) {
-      mapping_string = 'http://10.0.2.2:5000';
-    }
-
-    // Load products and handle category filtering asynchronously
     _initializePage();
 
-    // Set up the search controller listener
     searchController.addListener(() {
-      filterSearchResults(searchController.text);
+      filterSearchResults();
     });
   }
 
   Future<void> _initializePage() async {
-    await loadProductData(); // Wait for products to load
+    await _loadProductData();
 
-    _loadCatalogData();
+    // Once products are loaded, derive categories
+    final uniqueCategories = products.map((p) => p.category).toSet();
+    categories = uniqueCategories.map((catName) {
+      return Category(
+        name: catName,
+        image: "", // Not using images for categories
+      );
+    }).toList();
 
-    // Check if the category is provided and apply the filter
+    // If a category was passed, select it and apply it
     if (widget.category != null && widget.category!.isNotEmpty) {
-      String searchTerm = widget.category!;
-
-      // Ensure products are loaded before applying the filter
-      if (products.isNotEmpty) {
-        setState(() {
-          searchController.text = searchTerm; // Set the search text
-          filterSearchResults(searchTerm); // Run the filter
-        });
-      }
+      setState(() {
+        searchController.text = widget.category!;
+        selectedCategories.add(widget.category!);
+      });
     }
+
+    // Initially show all products since no filters or search are applied
+    searchResults = products;
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
-  // Checks for the platform if its on Android
-  bool isAndroid() {
-    if (kIsWeb) {
-      return false;
-    } else {
-      return Platform.isAndroid;
-    }
-  }
-
-  // Load category data from JSON
-  Future<void> _loadCatalogData() async {
+  // Load products from Firestore
+  Future<void> _loadProductData() async {
     try {
-      // Perform the GET request to fetch catalog data from the API
-      final response =
-          await http.get(Uri.parse('$mapping_string/api/products/catalog'));
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('products').get();
 
-      if (response.statusCode == 200) {
-        // Parse the JSON response
-        final data = json.decode(response.body);
-        setState(() {
-          categories = data[
-              'categories']; // Assuming the API response has a 'categories' key
-        });
-      } else {
-        // Handle non-200 status codes
-        throw Exception('Failed to load catalog data: ${response.statusCode}');
-      }
-    } catch (error) {
-      // Fallback: Load data from a local JSON file if API fails
-      try {
-        final String fallbackResponse =
-            await rootBundle.loadString('assets/data-ctlg.json');
-        final fallbackData = json.decode(fallbackResponse);
-        setState(() {
-          categories = fallbackData['categories'];
-        });
-      } catch (fallbackError) {
-        // Log or rethrow if fallback also fails
-        print('Error loading fallback catalog data: $fallbackError');
-        throw Exception('Failed to load catalog data from API and fallback.');
-      }
-    }
-  }
+      final productList =
+          querySnapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
 
-  void _scrollRight() {
-    _scrollController.animateTo(
-      _scrollController.offset + 300,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void _scrollLeft() {
-    _scrollController.animateTo(
-      _scrollController.offset - 300,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  Future<void> loadProductData() async {
-    try {
-      final response =
-          await http.get(Uri.parse('$mapping_string/api/products'));
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        setState(() {
-          products = jsonData['products'];
-          searchResults = products;
-        });
-      } else {
-        throw Exception('Failed to load products');
-      }
+      setState(() {
+        products = productList;
+      });
     } catch (e) {
       print('Error loading products: $e');
     }
   }
 
-  void filterSearchResults(String query) {
-    List<dynamic> results = [];
-    if (query.isNotEmpty) {
-      results = products.where((product) {
-        return product['name'].toLowerCase().contains(query.toLowerCase());
+  void filterSearchResults() {
+    if (isLoading) return; // Don't filter if still loading
+
+    final query = searchController.text.trim().toLowerCase();
+
+    // Start with all products
+    List<Product> results = products;
+
+    // Filter by selected categories if any
+    if (selectedCategories.isNotEmpty) {
+      results = results.where((product) {
+        return selectedCategories.contains(product.category);
       }).toList();
-    } else {
-      results = products;
     }
+
+    // Further filter by search query if present
+    if (query.isNotEmpty) {
+      results = results.where((product) {
+        final matchesName = product.name.toLowerCase().contains(query);
+        final matchesCategory = product.category.toLowerCase().contains(query);
+        return matchesName || matchesCategory;
+      }).toList();
+    }
+
     setState(() {
       searchResults = results;
     });
   }
 
-  Widget _buildCategoryCard(String category, String imageAsset) {
-    return GestureDetector(
-      onTap: () {
-        // filter products based on category
-        filterSearchResults(category);
-        searchController.text = category;
+  Widget _buildCategoryCheckboxes() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final cat = categories[index];
+        final isSelected = selectedCategories.contains(cat.name);
+        return CheckboxListTile(
+          activeColor: Colors.deepOrangeAccent, // Change checkmark color
+          title: Text(cat.name),
+          value: isSelected,
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                selectedCategories.add(cat.name);
+              } else {
+                selectedCategories.remove(cat.name);
+              }
+            });
+            filterSearchResults();
+          },
+        );
       },
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(width: 15),
-              Image.network(
-                imageAsset,
-                width: 30,
-                height: 30,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons
-                      .error); // Show an error icon in case image fails to load
-                },
-              ),
-              const SizedBox(width: 10),
-              TextButton(
-                onPressed: () {
-                  // filter products based on category
-                  filterSearchResults(category);
-                  searchController.text = category;
-                },
-                child: Text(category,
-                    style:
-                        const TextStyle(color: Colors.black, fontSize: 16.0)),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
-  Widget _buildShopCard(String productName, String imageAsset,
-      double productPrice, String pdescription, int productId) {
-    String priceRecord = "\$$productPrice";
+  Widget _buildShopCard(Product product) {
+    final priceRecord = "\$${product.price.toStringAsFixed(2)}";
 
     return FocusableControlBuilder(
       builder: (context, state) {
-        bool isHovered = state.isHovered;
+        final isHovered = state.isHovered;
 
         return GestureDetector(
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProductDetailsPage(
-                  productName: productName,
-                  productDescription: pdescription,
-                  productImage: imageAsset,
-                  productPrice: productPrice,
-                  productId: productId,
-                ),
+                builder: (context) => ProductDetailsPage(product: product),
               ),
             );
           },
           child: AnimatedScale(
-            scale: isHovered ? 1.0 : 0.9, // Zoom in when hovered
-            duration: const Duration(milliseconds: 200), // Animation duration
-            curve: Curves.easeInOut, // Smooth scaling curve
+            scale: isHovered ? 1.0 : 0.9,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
             child: Card(
+              color: Colors.white,
               elevation: 5,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16.0),
                   bottomRight: Radius.circular(16.0),
                 ),
@@ -247,32 +175,30 @@ class _ShopPageState extends State<ShopPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                          8.0), // Rounded corners for image
-                      child: Image.network(
-                        imageAsset,
-                        width: 160,
-                        height: 160,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error,
-                              size:
-                                  40); // Show error icon if image fails to load
-                        },
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.network(
+                          product.image,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.error, size: 40);
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      productName,
+                      product.name,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: Colors.black,
+                        color: Colors.black87,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -281,7 +207,7 @@ class _ShopPageState extends State<ShopPage> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Colors.deepOrangeAccent,
                       ),
                     ),
                   ],
@@ -294,91 +220,125 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 15.0, 16.0, 10.0),
+      child: TextField(
+        controller: searchController,
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search),
+          hintText: "Search products...",
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              searchController.clear();
+              filterSearchResults();
+            },
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductsSection() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 830;
+
+    if (isLoading) {
+      // While loading
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (searchResults.isEmpty && products.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40.0),
+          child: Text(
+            'No products found.',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: searchResults.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          // Show 4 items per row (crossAxisCount=4),
+          // adjust if screen is small if needed
+          crossAxisCount: isSmallScreen ? 2 : 4,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: isSmallScreen ? 2 / 2.8 : 2 / 2.5,
+        ),
+        itemBuilder: (context, index) {
+          return _buildShopCard(searchResults[index]);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    var isSmallScreen = screenWidth < 830;
-
     return Scaffold(
       appBar: widget.appBarBuilder(context),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: "What do you want to look for?",
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      searchController.clear();
-                    },
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left-side filter panel
+          Container(
+            width: 250,
+            color: Colors.white,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filters',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Categories',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  _buildCategoryCheckboxes(),
+                ],
               ),
             ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: _scrollLeft,
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: _scrollController,
-                    child: Row(
-                      children: categories.map((category) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: _buildCategoryCard(
-                              category['name'], category['image']),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  onPressed: _scrollRight,
-                ),
-              ],
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSearchBar(),
+                  const SizedBox(height: 10),
+                  _buildProductsSection(),
+                ],
+              ),
             ),
-            const SizedBox(height: 5),
-            searchResults.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: searchResults.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: isSmallScreen ? 2 : 4,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio:
-                          isSmallScreen ? 2 / 2.8 : 2 / 2.5, // Adjust the ratio
-                    ),
-                    itemBuilder: (context, index) {
-                      return _buildShopCard(
-                        searchResults[index]['name'],
-                        searchResults[index]['image'],
-                        searchResults[index]['price'],
-                        searchResults[index]['description'],
-                        searchResults[index]['id'],
-                      );
-                    },
-                  ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
