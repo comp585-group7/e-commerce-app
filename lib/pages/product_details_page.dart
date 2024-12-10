@@ -71,7 +71,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   Future<void> _addToCart(BuildContext context) async {
     if (user == null) {
-      // User is not logged in, redirect to LoginPage
+      // User not logged in
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -82,7 +82,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     try {
       final cartCollection = FirebaseFirestore.instance.collection('cart');
 
-      // Check if product is already in the user's cart
+      // Check if product already in cart
       final querySnapshot = await cartCollection
           .where('userId', isEqualTo: user!.uid)
           .where('productId', isEqualTo: widget.product.id)
@@ -90,7 +90,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Update quantity
         final docRef = querySnapshot.docs.first.reference;
         final currentData = querySnapshot.docs.first.data();
         final currentQuantity = currentData['quantity'] ?? 1;
@@ -99,7 +98,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         await docRef.update({'quantity': newQuantity});
         _showAddToCartDialog(context, 'Quantity updated in cart');
       } else {
-        // Add new cart entry
+        // Add new cart item
         await cartCollection.add({
           'userId': user!.uid,
           'productId': widget.product.id,
@@ -150,9 +149,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                 );
               },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
               child: const Text('Go to Cart'),
             ),
             TextButton(
@@ -165,9 +162,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                 );
               },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
               child: const Text('Shop More'),
             ),
           ],
@@ -241,7 +236,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
       appBar: buildAppBar(context),
       body: SingleChildScrollView(
         child: Padding(
-          // Remove horizontal padding so the reviews can take full width
           padding: const EdgeInsets.only(top: 24.0, bottom: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -316,7 +310,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     ),
               ),
               const SizedBox(height: 10),
-              // Centering the quantity controls
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -385,7 +378,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   child: Text('No reviews yet.'),
                 )
               else
-                // Reviews full width, left aligned
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: reviews.map((r) {
@@ -409,7 +401,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                 fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           const SizedBox(height: 4),
-                          // Horizontal stars under username
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: List.generate(5, (index) {
@@ -470,13 +461,32 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TextField(
-                    controller: _reviewController,
-                    decoration: const InputDecoration(
-                      labelText: 'Comment',
-                      border: OutlineInputBorder(),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.fromSwatch().copyWith(
+                        primary: Colors.deepOrangeAccent,
+                      ),
                     ),
-                    maxLines: 3,
+                    child: TextField(
+                      controller: _reviewController,
+                      decoration: InputDecoration(
+                        labelText: 'Comment',
+                        labelStyle:
+                            const TextStyle(color: Colors.deepOrangeAccent),
+                        border: const OutlineInputBorder(),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.deepOrangeAccent),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.deepOrangeAccent),
+                        ),
+                      ),
+                      maxLines: 3,
+                      cursorColor: Colors.deepOrangeAccent,
+                      style: const TextStyle(color: Colors.black),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
