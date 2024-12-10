@@ -319,7 +319,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),
                       child: Text(
-                        "${itemData['name']} x${itemData['quantity']} @ \$${itemData['price']}",
+                        "${itemData['name']} x${itemData['quantity']}  \$${itemData['price']}",
                         style: const TextStyle(fontSize: 14),
                       ),
                     );

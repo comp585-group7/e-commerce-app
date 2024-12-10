@@ -17,7 +17,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
   List<Product> products = [];
-  List<Category> categories = [];
 
   @override
   void initState() {
@@ -34,16 +33,6 @@ class _HomePageState extends State<HomePage> {
 
       setState(() {
         products = productList;
-        // Generate categories from products themselves
-        final uniqueCategories = products.map((p) => p.category).toSet();
-
-        // Map these category names to Category objects without images
-        categories = uniqueCategories.map((catName) {
-          return Category(
-            name: catName,
-            image: "", // We are not using images for categories now
-          );
-        }).toList();
       });
     } catch (e) {
       print('Error loading products: $e');
@@ -66,45 +55,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildCategoryCard(Category category) {
-    return _AnimatedHoverContainer(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ShopPage(
-              appBarBuilder: buildAppBar,
-              category: category.name,
-            ),
-          ),
-        );
-      },
-      child: Card(
-        color: Colors.white,
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        child: Center(
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-            child: Text(
-              category.name,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildProductCard(Product product, double cardWidth) {
     return GestureDetector(
       onTap: () {
-        // Navigate to ProductDetailsPage
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -152,7 +105,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       '\$${product.price.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.green,
+                            color: Colors.deepOrangeAccent,
                             fontWeight: FontWeight.w600,
                           ),
                       textAlign: TextAlign.center,
@@ -168,68 +121,44 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeroSection() {
-    return SizedBox(
+    return Container(
+      width: double.infinity,
       height: 250.0,
       child: Stack(
         fit: StackFit.expand,
         children: [
           Image.network(
-            'https://i.ibb.co/L6h1vcq/Database-VS-File-System-Copy.png',
+            'https://i.ibb.co/QJHkQW0/orange.png',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return const Icon(Icons.error);
             },
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.5),
-                  Colors.black.withOpacity(0.1),
-                ],
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-              ),
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Black Friday Sale',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 10.0,
-                          color: Colors.black87,
-                          offset: Offset(2.0, 2.0),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Up to 50% off on selected items',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white70,
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 10.0,
-                          color: Colors.black54,
-                          offset: Offset(1.0, 1.0),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+          Align(
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'StyleHive',
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 50.0,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '“A streetwear brand”',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white70,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 25.0,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ],
@@ -238,108 +167,180 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFeaturedProductsSection(double cardHeight, double cardWidth) {
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Center(
-            child: Text(
-              'Shop Latest Apparel',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-              textAlign: TextAlign.center,
+    // Limit to 4 items for display
+    int displayCount = math.min(products.length, 4);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 40.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Center(
+              child: Text(
+                'Shop Latest Apparel',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrangeAccent,
+                    ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: cardHeight,
-          child: Stack(
-            children: [
-              Row(
-                children: [
-                  const SizedBox(width: 50),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        var product = products[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
-                          child: _buildProductCard(product, cardWidth),
-                        );
-                      },
+          const SizedBox(height: 20),
+          SizedBox(
+            height: cardHeight,
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 50),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: displayCount, // Show up to 4 items
+                        itemBuilder: (context, index) {
+                          var product = products[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: _buildProductCard(product, cardWidth),
+                          );
+                        },
+                      ),
                     ),
+                    const SizedBox(width: 50),
+                  ],
+                ),
+                // Left arrow button
+                Positioned(
+                  left: 0,
+                  top: cardHeight / 2 - 25,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.black,
+                    mini: true,
+                    onPressed: _scrollLeft,
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
-                  const SizedBox(width: 50),
-                ],
-              ),
-              Positioned(
-                left: 0,
-                top: cardHeight / 2 - 25,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.black,
-                  mini: true,
-                  onPressed: _scrollLeft,
-                  child: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
-              ),
-              Positioned(
-                right: 0,
-                top: cardHeight / 2 - 25,
-                child: FloatingActionButton(
-                  backgroundColor: Colors.black,
-                  mini: true,
-                  onPressed: _scrollRight,
-                  child: const Icon(Icons.arrow_forward, color: Colors.white),
+                // Right arrow button
+                Positioned(
+                  right: 0,
+                  top: cardHeight / 2 - 25,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.black,
+                    mini: true,
+                    onPressed: _scrollRight,
+                    child: const Icon(Icons.arrow_forward, color: Colors.white),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildCategorySection(bool isSmallScreen) {
-    return Column(
-      children: [
-        const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Center(
+  Widget _buildBrandStorySection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          Text(
+            'Our Story',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrangeAccent,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
-              'Shop by Category',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+              'Founded with a vision to revolutionize fashion, StyleHive brings you carefully curated apparel that blends style, sustainability, and affordability. Our team of designers and trend-setters scour the globe to bring you the latest collections, ensuring that you always look and feel your best.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 16.0,
+                    height: 1.5,
                   ),
               textAlign: TextAlign.center,
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        // Display categories as text only, centered
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: isSmallScreen ? 2.5 : 6.5,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            children: categories.map((category) {
-              return _buildCategoryCard(category);
-            }).toList(),
+          const SizedBox(height: 40),
+          Image.network(
+            'https://i.ibb.co/BwtswSr/street-Wear.jpg',
+            fit: BoxFit.fitWidth,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.error, size: 40);
+            },
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialsSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'What Our Customers Say',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrangeAccent,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          _buildTestimonialCard(
+            '“I love the variety and quality of clothes at StyleHive. I always find something new and exciting!”',
+            '– Sarah K.',
+          ),
+          const SizedBox(height: 30),
+          _buildTestimonialCard(
+            '“The customer service is top-notch, and their sustainable approach makes me feel good about my purchases.”',
+            '– James P.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialCard(String quote, String author) {
+    return Card(
+      elevation: 3,
+      color: Colors.white,
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              quote,
+              style: const TextStyle(
+                fontStyle: FontStyle.italic,
+                fontSize: 16.0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              author,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14.0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -352,30 +353,13 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'About Us',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'StyleHive is your go-to destination for the latest trends in fashion. '
-            'We are dedicated to bringing you the most stylish, sustainable, and affordable apparel.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Text(
             'Contact Us',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -412,9 +396,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+    // Increase cardWidth so fewer items fit, forcing scroll
     double cardHeight = math.min(screenHeight * 0.4, 400);
-    double cardWidth = math.min(screenWidth * 0.45, 250);
-    bool isSmallScreen = screenWidth < 750;
+    double cardWidth = math.min(screenWidth * 0.6, 500);
 
     return Scaffold(
       appBar: buildAppBar(context),
@@ -424,7 +408,8 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildHeroSection(),
             _buildFeaturedProductsSection(cardHeight, cardWidth),
-            _buildCategorySection(isSmallScreen),
+            _buildBrandStorySection(),
+            _buildTestimonialsSection(),
             const SizedBox(height: 40),
             _buildFooter(),
           ],
