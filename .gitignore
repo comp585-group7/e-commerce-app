@@ -5,6 +5,7 @@
 .flutter-versions
 .pub-cache/
 .pub/
+build/
 packages/
 # Keep pubspec.lock for application packages
 # Remove it if you're publishing a package
