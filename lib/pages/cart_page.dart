@@ -323,15 +323,18 @@ class _CartPageState extends State<CartPage> {
                     },
                   ),
                 ),
+                // Centered, deepOrangeAccent color, increased font size for total
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 20),
                   child: Text(
                     'Total: \$${total.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
+                          fontSize: 24.0,
+                          color: Colors.deepOrangeAccent,
                         ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 Padding(

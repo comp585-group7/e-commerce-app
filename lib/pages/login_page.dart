@@ -125,115 +125,131 @@ class _LoginPageState extends State<LoginPage> {
               // Login Form
               Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    // Email input
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: const Icon(Icons.email),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.fromSwatch().copyWith(
+                      primary: Colors.deepOrangeAccent,
+                    ),
+                    inputDecorationTheme: const InputDecorationTheme(
+                      labelStyle: TextStyle(color: Colors.deepOrangeAccent),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.deepOrangeAccent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.deepOrangeAccent),
+                      ),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Email input
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon:
+                              Icon(Icons.email, color: Colors.deepOrangeAccent),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        cursorColor: Colors.deepOrangeAccent,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your email.';
+                          }
+                          // Simple email regex
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(value.trim())) {
+                            return 'Please enter a valid email.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      // Password input
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon:
+                              Icon(Icons.lock, color: Colors.deepOrangeAccent),
+                        ),
+                        obscureText: true,
+                        cursorColor: Colors.deepOrangeAccent,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your password.';
+                          }
+                          if (value.trim().length < 6) {
+                            return 'Password must be at least 6 characters.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      // Sign-in button
+                      ElevatedButton(
+                        onPressed: _signIn,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black, // Button color
+                          foregroundColor: Colors.white, // Text color
+                          minimumSize:
+                              const Size(double.infinity, 50), // Button size
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: const Text(
+                          'Sign In',
+                          style: TextStyle(fontSize: 18.0),
                         ),
                       ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your email.';
-                        }
-                        // Simple email regex
-                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                            .hasMatch(value.trim())) {
-                          return 'Please enter a valid email.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    // Password input
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
+                      const SizedBox(height: 20),
+                      // Navigate to RegisterPage
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Don't have an account?",
+                            style: TextStyle(
+                                fontSize: 16.0, color: Colors.black54),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const RegisterPage()),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.black, // Text color
+                            ),
+                            child: const Text(
+                              'Register',
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
                       ),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your password.';
-                        }
-                        if (value.trim().length < 6) {
-                          return 'Password must be at least 6 characters.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 30),
-                    // Sign-in button
-                    ElevatedButton(
-                      onPressed: _signIn,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black, // Button color
-                        foregroundColor: Colors.white, // Text color
-                        minimumSize:
-                            const Size(double.infinity, 50), // Button size
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Text(
-                        'Sign In',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Navigate to RegisterPage
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Don't have an account?",
+                      // Back to HomePage button
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HomePage()),
+                          );
+                        },
+                        child: const Text(
+                          'Back to Home',
                           style:
                               TextStyle(fontSize: 16.0, color: Colors.black54),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const RegisterPage()),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.black, // Text color
-                          ),
-                          child: const Text(
-                            'Register',
-                            style: TextStyle(
-                                fontSize: 16.0, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Back to HomePage button
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomePage()),
-                        );
-                      },
-                      child: const Text(
-                        'Back to Home',
-                        style: TextStyle(fontSize: 16.0, color: Colors.black54),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

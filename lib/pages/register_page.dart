@@ -37,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
-      // Attempt to create a new user
+      // Create user
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -128,137 +128,152 @@ class _RegisterPageState extends State<RegisterPage> {
               // Registration Form
               Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    // Email input
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: const Icon(Icons.email),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.fromSwatch().copyWith(
+                      primary: Colors.deepOrangeAccent,
+                    ),
+                    inputDecorationTheme: const InputDecorationTheme(
+                      labelStyle: TextStyle(color: Colors.deepOrangeAccent),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.deepOrangeAccent),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.deepOrangeAccent),
+                      ),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Email input
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon:
+                              Icon(Icons.email, color: Colors.deepOrangeAccent),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        cursorColor: Colors.deepOrangeAccent,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your email.';
+                          }
+                          // Simple email regex
+                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(value.trim())) {
+                            return 'Please enter a valid email.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      // Password input
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon:
+                              Icon(Icons.lock, color: Colors.deepOrangeAccent),
+                        ),
+                        obscureText: true,
+                        cursorColor: Colors.deepOrangeAccent,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter your password.';
+                          }
+                          if (value.trim().length < 6) {
+                            return 'Password must be at least 6 characters.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      // Confirm Password input
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm Password',
+                          prefixIcon: Icon(Icons.lock_outline,
+                              color: Colors.deepOrangeAccent),
+                        ),
+                        obscureText: true,
+                        cursorColor: Colors.deepOrangeAccent,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please confirm your password.';
+                          }
+                          if (value.trim() != _passwordController.text.trim()) {
+                            return 'Passwords do not match.';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      // Register button
+                      ElevatedButton(
+                        onPressed: _register,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black, // Button color
+                          foregroundColor: Colors.white, // Text color
+                          minimumSize:
+                              const Size(double.infinity, 50), // Button size
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: const Text(
+                          'Register',
+                          style: TextStyle(fontSize: 18.0),
                         ),
                       ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your email.';
-                        }
-                        // Simple email regex
-                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                            .hasMatch(value.trim())) {
-                          return 'Please enter a valid email.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    // Password input
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
+                      const SizedBox(height: 20),
+                      // Navigate to LoginPage
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Already have an account?",
+                            style: TextStyle(
+                                fontSize: 16.0, color: Colors.black54),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginPage()),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.black, // Text color
+                            ),
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
                       ),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter your password.';
-                        }
-                        if (value.trim().length < 6) {
-                          return 'Password must be at least 6 characters.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    // Confirm Password input
-                    TextFormField(
-                      controller: _confirmPasswordController,
-                      decoration: InputDecoration(
-                        labelText: 'Confirm Password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please confirm your password.';
-                        }
-                        if (value.trim() != _passwordController.text.trim()) {
-                          return 'Passwords do not match.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 30),
-                    // Register button
-                    ElevatedButton(
-                      onPressed: _register,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black, // Button color
-                        foregroundColor: Colors.white, // Text color
-                        minimumSize:
-                            const Size(double.infinity, 50), // Button size
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Text(
-                        'Register',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Navigate to LoginPage
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Already have an account?",
+                      // Back to HomePage button
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const HomePage()),
+                          );
+                        },
+                        child: const Text(
+                          'Back to Home',
                           style:
                               TextStyle(fontSize: 16.0, color: Colors.black54),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginPage()),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.black, // Text color
-                          ),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(
-                                fontSize: 16.0, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Back to HomePage button
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomePage()),
-                        );
-                      },
-                      child: const Text(
-                        'Back to Home',
-                        style: TextStyle(fontSize: 16.0, color: Colors.black54),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

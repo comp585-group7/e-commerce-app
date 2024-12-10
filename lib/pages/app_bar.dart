@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:html' as html; // Add this import for web URL manipulation
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'home_page.dart';
 import 'profile_page.dart';
 import 'shop_page.dart';
 import 'cart_page.dart';
 import 'login_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 AppBar buildAppBar(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
+
+  void _trimUrl() {
+    if (kIsWeb) {
+      var url = html.window.location.href;
+      var idx = url.lastIndexOf('/');
+      if (idx > 0) {
+        var newUrl = url.substring(0, idx);
+        html.window.history.pushState(null, '', newUrl);
+      }
+    }
+  }
 
   return AppBar(
     backgroundColor: Colors.black,
@@ -26,7 +39,9 @@ AppBar buildAppBar(BuildContext context) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const HomePage()),
-              );
+              ).then((_) {
+                _trimUrl();
+              });
             },
             hoverColor: Colors.deepOrangeAccent,
             defaultColor: Colors.white,
@@ -47,11 +62,12 @@ AppBar buildAppBar(BuildContext context) {
                       builder: (context) =>
                           ShopPage(appBarBuilder: buildAppBar),
                     ),
-                  );
+                  ).then((_) {
+                    _trimUrl();
+                  });
                 },
               ),
               const SizedBox(width: 8),
-              // Show cart icon only if user is logged in
               if (user != null) ...[
                 _AnimatedHoverIconButton(
                   icon: FontAwesomeIcons.shoppingCart,
@@ -62,7 +78,9 @@ AppBar buildAppBar(BuildContext context) {
                         builder: (context) =>
                             CartPage(appBarBuilder: buildAppBar),
                       ),
-                    );
+                    ).then((_) {
+                      _trimUrl();
+                    });
                   },
                 ),
                 const SizedBox(width: 8),
@@ -75,11 +93,12 @@ AppBar buildAppBar(BuildContext context) {
                         builder: (context) =>
                             ProfilePage(appBarBuilder: buildAppBar),
                       ),
-                    );
+                    ).then((_) {
+                      _trimUrl();
+                    });
                   },
                 ),
               ] else
-                // If user not logged in, show "Login" text button instead
                 _AnimatedHoverTextButton(
                   label: 'Login',
                   onPressed: () {
@@ -87,7 +106,9 @@ AppBar buildAppBar(BuildContext context) {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const LoginPage()),
-                    );
+                    ).then((_) {
+                      _trimUrl();
+                    });
                   },
                   hoverColor: Colors.deepOrangeAccent,
                   defaultColor: Colors.white,
@@ -105,7 +126,6 @@ AppBar buildAppBar(BuildContext context) {
   );
 }
 
-/// A text button that scales and changes color on hover for a modern look.
 class _AnimatedHoverTextButton extends StatefulWidget {
   final String label;
   final VoidCallback onPressed;
@@ -155,7 +175,6 @@ class _AnimatedHoverTextButtonState extends State<_AnimatedHoverTextButton> {
   }
 }
 
-/// An icon button that scales and subtly changes color on hover.
 class _AnimatedHoverIconButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onPressed;

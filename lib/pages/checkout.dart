@@ -46,7 +46,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'You will be securely redirected to our payment platform, powered by Stripe, to complete your purchase.',
+                  'You will be securely redirected to our payment platform, powered by Stripe, to complete your purchase. Please be sure to allow pop-ups as if they are disabled payment system may not work properly.',
                   style: textTheme.bodyMedium?.copyWith(fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
@@ -56,6 +56,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 24.0,
+                    color: Colors.deepOrangeAccent, // Changed color here
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -63,7 +64,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 14.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 24.0), // Added more padding
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
