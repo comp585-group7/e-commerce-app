@@ -85020,7 +85020,7 @@ p=this.c
 p.toString
 p=A.P(p).p2.Q
 p=p==null?o:p.bz(B.Cn)
-return A.hP(o,A.c8(A.b([n,B.aV,r,B.bt,A.b_("\xa9 "+A.Np(new A.cR(q,0,!1))+" StyleHive. All rights reserved.",o,o,o,p,o,o)],s),B.E,B.u,B.y),B.A,B.iz,o,o,o,o,o,B.mz,o,o,1/0)},
+return A.hP(o,A.c8(A.b([n,B.aV,r,B.bt,A.b_("\xa9 "+A.Np(new A.cR(q,0,!1))+" StyleHiveee. All rights reserved.",o,o,o,p,o,o)],s),B.E,B.u,B.y),B.A,B.iz,o,o,o,o,o,B.mz,o,o,1/0)},
 J(a){var s,r,q,p,o,n=this,m=null,l=t.w,k=A.bM(a,m,l).w
 l=A.bM(a,m,l).w
 s=Math.min(k.a.b*0.4,400)
