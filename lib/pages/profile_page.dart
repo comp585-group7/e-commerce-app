@@ -89,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
         };
       }).toList();
 
-      // For each review, fetch the product's name
+      // Fetch product names for each review
       for (var review in rawReviews) {
         final productId = review['productId'];
         if (productId.isNotEmpty) {
@@ -106,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
             review['productName'] = productName;
           } catch (e) {
             print('Error fetching product name for $productId: $e');
-            review['productName'] = review['productId']; // fallback
+            review['productName'] = review['productId'];
           }
         } else {
           review['productName'] = 'Unknown Product';
@@ -165,6 +165,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     subtitle: const Text("Tap to change your password"),
                     trailing: const Icon(Icons.edit),
                     onTap: () => _showChangePasswordDialog(context),
+                  ),
+                  // Logout button added here
+                  ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: const Text("Logout"),
+                    subtitle: const Text("Tap to logout of your account"),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: _handleLogout,
                   ),
                   const Divider(height: 20, thickness: 1),
                   _buildSectionHeader(context, "Previous Orders",
@@ -359,13 +367,9 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Product title and stars horizontally under it
                 Text("Product: $productName",
                     style: const TextStyle(fontWeight: FontWeight.bold)),
-
                 const SizedBox(height: 8),
-
-                // Row of stars horizontally
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(5, (index) {
@@ -377,7 +381,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   }),
                 ),
-
                 const SizedBox(height: 8),
                 Text(comment, style: const TextStyle(fontSize: 14)),
                 const SizedBox(height: 4),
