@@ -120,6 +120,7 @@ class _ShopPageState extends State<ShopPage> {
         final cat = categories[index];
         final isSelected = selectedCategories.contains(cat.name);
         return CheckboxListTile(
+          activeColor: Colors.deepOrangeAccent, // Change checkmark color
           title: Text(cat.name),
           value: isSelected,
           onChanged: (bool? value) {
@@ -175,16 +176,16 @@ class _ShopPageState extends State<ShopPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.network(
-                        product.image,
-                        width: 160,
-                        height: 160,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error, size: 40);
-                        },
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.network(
+                          product.image,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.error, size: 40);
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -206,7 +207,7 @@ class _ShopPageState extends State<ShopPage> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Colors.deepOrangeAccent,
                       ),
                     ),
                   ],
@@ -247,7 +248,7 @@ class _ShopPageState extends State<ShopPage> {
     final isSmallScreen = screenWidth < 830;
 
     if (isLoading) {
-      // While loading, maybe show a loading spinner
+      // While loading
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 40.0),
@@ -256,7 +257,6 @@ class _ShopPageState extends State<ShopPage> {
       );
     }
 
-    // If products is empty from the database, show 'No products found.'
     if (searchResults.isEmpty && products.isEmpty) {
       return const Center(
         child: Padding(
@@ -276,6 +276,8 @@ class _ShopPageState extends State<ShopPage> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: searchResults.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          // Show 4 items per row (crossAxisCount=4),
+          // adjust if screen is small if needed
           crossAxisCount: isSmallScreen ? 2 : 4,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
@@ -290,13 +292,12 @@ class _ShopPageState extends State<ShopPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Filters panel background is white
     return Scaffold(
       appBar: widget.appBarBuilder(context),
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left-side filter panel with white background
+          // Left-side filter panel
           Container(
             width: 250,
             color: Colors.white,
@@ -319,20 +320,18 @@ class _ShopPageState extends State<ShopPage> {
                         ),
                   ),
                   const SizedBox(height: 10),
-                  _buildCategoryCheckboxes(), // Renamed method to avoid duplicates
+                  _buildCategoryCheckboxes(),
                 ],
               ),
             ),
           ),
 
-          // Main product section
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildSearchBar(),
-                  // Removed the 'Products' title here
                   const SizedBox(height: 10),
                   _buildProductsSection(),
                 ],
