@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-// Note: Only import dart:html if you're on the web.
-// For multi-platform builds, consider conditional imports.
-// Since we're using `kIsWeb` checks, we can still import, but must be careful.
-import 'dart:html' as html;
 
 import 'home_page.dart';
 import 'profile_page.dart';
@@ -15,17 +10,6 @@ import 'login_page.dart';
 
 AppBar buildAppBar(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
-
-  void _trimUrl() {
-    if (kIsWeb) {
-      var url = html.window.location.href;
-      var idx = url.lastIndexOf('/');
-      if (idx > 0) {
-        var newUrl = url.substring(0, idx);
-        html.window.history.pushState(null, '', newUrl);
-      }
-    }
-  }
 
   return AppBar(
     backgroundColor: Colors.black,
@@ -42,9 +26,7 @@ AppBar buildAppBar(BuildContext context) {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const HomePage()),
-              ).then((_) {
-                _trimUrl();
-              });
+              );
             },
             hoverColor: Colors.deepOrangeAccent,
             defaultColor: Colors.white,
@@ -65,9 +47,7 @@ AppBar buildAppBar(BuildContext context) {
                       builder: (context) =>
                           ShopPage(appBarBuilder: buildAppBar),
                     ),
-                  ).then((_) {
-                    _trimUrl();
-                  });
+                  );
                 },
               ),
               const SizedBox(width: 8),
@@ -81,9 +61,7 @@ AppBar buildAppBar(BuildContext context) {
                         builder: (context) =>
                             CartPage(appBarBuilder: buildAppBar),
                       ),
-                    ).then((_) {
-                      _trimUrl();
-                    });
+                    );
                   },
                 ),
                 const SizedBox(width: 8),
@@ -96,9 +74,7 @@ AppBar buildAppBar(BuildContext context) {
                         builder: (context) =>
                             ProfilePage(appBarBuilder: buildAppBar),
                       ),
-                    ).then((_) {
-                      _trimUrl();
-                    });
+                    );
                   },
                 ),
               ] else
@@ -109,9 +85,7 @@ AppBar buildAppBar(BuildContext context) {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const LoginPage()),
-                    ).then((_) {
-                      _trimUrl();
-                    });
+                    );
                   },
                   hoverColor: Colors.deepOrangeAccent,
                   defaultColor: Colors.white,
@@ -161,7 +135,7 @@ class _AnimatedHoverTextButtonState extends State<_AnimatedHoverTextButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
-      cursor: SystemMouseCursors.click, // Turns mouse into clickable pointer
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedScale(
@@ -205,7 +179,7 @@ class _AnimatedHoverIconButtonState extends State<_AnimatedHoverIconButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
-      cursor: SystemMouseCursors.click, // Turns mouse into clickable pointer
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedScale(
