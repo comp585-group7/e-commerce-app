@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:html' as html; // Add this import for web URL manipulation
 import 'package:flutter/foundation.dart' show kIsWeb;
+// Note: Only import dart:html if you're on the web.
+// For multi-platform builds, consider conditional imports.
+// Since we're using `kIsWeb` checks, we can still import, but must be careful.
+import 'dart:html' as html;
 
 import 'home_page.dart';
 import 'profile_page.dart';
@@ -158,6 +161,7 @@ class _AnimatedHoverTextButtonState extends State<_AnimatedHoverTextButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click, // Turns mouse into clickable pointer
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedScale(
@@ -201,7 +205,7 @@ class _AnimatedHoverIconButtonState extends State<_AnimatedHoverIconButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
-      cursor: SystemMouseCursors.click,
+      cursor: SystemMouseCursors.click, // Turns mouse into clickable pointer
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedScale(
