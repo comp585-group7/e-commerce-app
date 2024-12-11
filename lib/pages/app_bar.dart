@@ -158,6 +158,7 @@ class _AnimatedHoverTextButtonState extends State<_AnimatedHoverTextButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click, // Change cursor on hover
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedScale(
@@ -201,7 +202,7 @@ class _AnimatedHoverIconButtonState extends State<_AnimatedHoverIconButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
-      cursor: SystemMouseCursors.click,
+      cursor: SystemMouseCursors.click, // Change cursor on hover
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedScale(
