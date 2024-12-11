@@ -383,7 +383,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   children: reviews.map((r) {
                     final rating = r['rating'] ?? 0;
                     final comment = r['comment'] ?? '';
-                    final email = r['userEmail'] ?? '';
+                    final fullEmail = r['userEmail'] ?? '';
+
+                    // Extract the portion before the '@'
+                    final username = fullEmail.split('@').first;
+
                     return Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 10),
@@ -396,7 +400,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            email,
+                            username,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 14),
                           ),
@@ -469,16 +473,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     ),
                     child: TextField(
                       controller: _reviewController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Comment',
-                        labelStyle:
-                            const TextStyle(color: Colors.deepOrangeAccent),
-                        border: const OutlineInputBorder(),
-                        enabledBorder: const OutlineInputBorder(
+                        labelStyle: TextStyle(color: Colors.deepOrangeAccent),
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
                           borderSide:
                               BorderSide(color: Colors.deepOrangeAccent),
                         ),
-                        focusedBorder: const OutlineInputBorder(
+                        focusedBorder: OutlineInputBorder(
                           borderSide:
                               BorderSide(color: Colors.deepOrangeAccent),
                         ),
