@@ -45,10 +45,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'You will be securely redirected to our payment platform, powered by Stripe, to complete your purchase. Please be sure to allow pop-ups as if they are disabled payment system may not work properly.',
-                  style: textTheme.bodyMedium?.copyWith(fontSize: 16),
+                // Using RichText for partial coloring
+                RichText(
                   textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: textTheme.bodyMedium?.copyWith(fontSize: 16),
+                    children: [
+                      const TextSpan(
+                        text:
+                            'You will be securely redirected to our payment platform, powered by Stripe, to complete your purchase. ',
+                      ),
+                      TextSpan(
+                        text:
+                            'Please be sure to allow pop-ups. If they are disabled payment system may not work properly.',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 30),
                 Text(
@@ -56,7 +69,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 24.0,
-                    color: Colors.deepOrangeAccent, // Changed color here
+                    color: Colors.deepOrangeAccent,
                   ),
                   textAlign: TextAlign.center,
                 ),

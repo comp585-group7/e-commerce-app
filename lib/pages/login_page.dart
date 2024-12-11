@@ -70,9 +70,31 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       // Close the loading indicator
       Navigator.of(context).pop();
-
       // Show general error message
       _showSnackBar('Failed to sign in: $e');
+    }
+  }
+
+  // Reset password method
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showSnackBar('Please enter your email to reset password.');
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showSnackBar(
+          'If account with that email exists, email was just sent to your account. Check your inbox.');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        _showSnackBar('No user found with this email.');
+      } else {
+        _showSnackBar('Error: ${e.message}');
+      }
+    } catch (e) {
+      _showSnackBar('Failed to send reset email: $e');
     }
   }
 
@@ -81,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.deepOrangeAccent,
       ),
     );
   }
@@ -185,6 +207,19 @@ class _LoginPageState extends State<LoginPage> {
                           }
                           return null;
                         },
+                      ),
+                      const SizedBox(height: 10),
+                      // Forgot Password Link
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _forgotPassword,
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                                color: Colors.deepOrangeAccent, fontSize: 14),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 30),
                       // Sign-in button
